@@ -1,7 +1,14 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type FormEvent } from "react";
-import { todoStore, type Todo } from "@/lib/todo-store";
+import { useId, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { personalTodos, workTodos, type Todo, type TodoStore } from "@/lib/todo-store";
+
+const STORES = {
+  work: workTodos,
+  personal: personalTodos,
+} satisfies Record<string, TodoStore>;
+
+export type ListName = keyof typeof STORES;
 
 type Filter = "all" | "active" | "completed";
 
@@ -15,11 +22,22 @@ function pluralTasks(count: number) {
   return count === 1 ? "1 оставаща задача" : `${count} оставащи задачи`;
 }
 
-export function TodoApp() {
+export function TodoList({
+  list,
+  title,
+  autoFocus = false,
+}: {
+  list: ListName;
+  title: string;
+  autoFocus?: boolean;
+}) {
+  const store = STORES[list];
+  const inputId = useId();
+  const headingId = useId();
   const todos = useSyncExternalStore(
-    todoStore.subscribe,
-    todoStore.getSnapshot,
-    todoStore.getServerSnapshot,
+    store.subscribe,
+    store.getSnapshot,
+    store.getServerSnapshot,
   );
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState("");
@@ -27,25 +45,31 @@ export function TodoApp() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!draft.trim()) return;
-    todoStore.add(draft);
+    store.add(draft);
     setDraft("");
   }
 
   const loaded = todos !== null;
-  const list = todos ?? [];
-  const activeCount = list.filter((t) => !t.completed).length;
-  const completedCount = list.length - activeCount;
-  const visible = list.filter((t) =>
+  const items = todos ?? [];
+  const activeCount = items.filter((t) => !t.completed).length;
+  const completedCount = items.length - activeCount;
+  const visible = items.filter((t) =>
     filter === "all" ? true : filter === "active" ? !t.completed : t.completed,
   );
 
   return (
-    <section className="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <section
+      aria-labelledby={headingId}
+      className="w-full min-w-0 rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+    >
+      <h2 id={headingId} className="px-4 pt-4 text-lg font-semibold">
+        {title}
+      </h2>
       <form onSubmit={handleSubmit} className="flex items-center gap-2 border-b border-zinc-200 p-3 dark:border-zinc-800">
         <button
           type="button"
-          onClick={() => todoStore.setAll(activeCount > 0)}
-          disabled={list.length === 0}
+          onClick={() => store.setAll(activeCount > 0)}
+          disabled={items.length === 0}
           aria-label={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
           title={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 disabled:invisible dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
@@ -54,14 +78,14 @@ export function TodoApp() {
             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
           </svg>
         </button>
-        <label htmlFor="new-todo" className="sr-only">Нова задача</label>
+        <label htmlFor={inputId} className="sr-only">Нова задача: {title}</label>
         <input
-          id="new-todo"
+          id={inputId}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Какво трябва да се направи?"
           autoComplete="off"
-          autoFocus
+          autoFocus={autoFocus}
           className="min-w-0 flex-1 bg-transparent px-1 py-2 text-base outline-none placeholder:text-zinc-400"
         />
         <button
@@ -77,7 +101,7 @@ export function TodoApp() {
         <p className="p-6 text-center text-sm text-zinc-400">Зареждане…</p>
       ) : visible.length === 0 ? (
         <p className="p-6 text-center text-sm text-zinc-500">
-          {list.length === 0
+          {items.length === 0
             ? "Нямаш задачи. Добави първата отгоре."
             : filter === "active"
               ? "Всичко е свършено."
@@ -86,15 +110,15 @@ export function TodoApp() {
       ) : (
         <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
           {visible.map((todo) => (
-            <TodoItem key={todo.id} todo={todo} />
+            <TodoItem key={todo.id} todo={todo} store={store} />
           ))}
         </ul>
       )}
 
-      {loaded && list.length > 0 && (
+      {loaded && items.length > 0 && (
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-200 px-4 py-3 text-sm text-zinc-500 dark:border-zinc-800">
           <span>{pluralTasks(activeCount)}</span>
-          <div className="flex gap-1" role="group" aria-label="Филтър">
+          <div className="flex gap-1" role="group" aria-label={`Филтър: ${title}`}>
             {FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -109,7 +133,7 @@ export function TodoApp() {
           </div>
           <button
             type="button"
-            onClick={() => todoStore.clearCompleted()}
+            onClick={() => store.clearCompleted()}
             disabled={completedCount === 0}
             className="rounded-md px-2 py-1 hover:bg-zinc-100 hover:text-zinc-900 disabled:invisible dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           >
@@ -121,7 +145,7 @@ export function TodoApp() {
   );
 }
 
-function TodoItem({ todo }: { todo: Todo }) {
+function TodoItem({ todo, store }: { todo: Todo; store: TodoStore }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(todo.title);
   // Guards against a blur fired while the input unmounts after Enter/Escape.
@@ -137,7 +161,7 @@ function TodoItem({ todo }: { todo: Todo }) {
     if (doneRef.current) return;
     doneRef.current = true;
     setEditing(false);
-    if (commit && text.trim() !== todo.title) todoStore.rename(todo.id, text);
+    if (commit && text.trim() !== todo.title) store.rename(todo.id, text);
   }
 
   if (editing) {
@@ -165,7 +189,7 @@ function TodoItem({ todo }: { todo: Todo }) {
       <input
         type="checkbox"
         checked={todo.completed}
-        onChange={() => todoStore.toggle(todo.id)}
+        onChange={() => store.toggle(todo.id)}
         aria-label={`Завършена: ${todo.title}`}
         className="size-5 shrink-0 cursor-pointer accent-zinc-900 dark:accent-zinc-100"
       />
@@ -188,7 +212,7 @@ function TodoItem({ todo }: { todo: Todo }) {
       </button>
       <button
         type="button"
-        onClick={() => todoStore.remove(todo.id)}
+        onClick={() => store.remove(todo.id)}
         aria-label={`Изтрий: ${todo.title}`}
         className="rounded-md p-1 text-zinc-400 opacity-0 hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 dark:hover:bg-red-950"
       >
