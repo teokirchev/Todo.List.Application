@@ -40,7 +40,12 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
             Вход с Google
           </a>
 
-          <p className="text-xs text-zinc-400">Достъп имат само поканени акаунти.</p>
+          <p className="text-xs text-zinc-400">
+            Достъп имат само поканени акаунти. ·{" "}
+            <a href="/privacy" className="underline hover:text-zinc-600 dark:hover:text-zinc-200">
+              Поверителност
+            </a>
+          </p>
         </div>
       </div>
     </main>
