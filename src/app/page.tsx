@@ -10,8 +10,8 @@ import { getTodoLists } from "@/lib/todo-repo";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-12">
-      <header className="mb-8 flex flex-col items-center gap-3 text-center text-white">
+    <main className="relative flex flex-1 flex-col items-center px-4 py-10 sm:py-12">
+      <header className="mb-10 flex flex-col items-center gap-3 text-center text-white">
         <ClubCrest className="h-28 w-auto drop-shadow-[0_10px_20px_rgb(0_0_0/0.35)]" />
         <p className="font-display text-sm tracking-[0.35em] text-white/80 uppercase">
           The Gunners <span className="text-club-gold">·</span> Est. 1886
@@ -48,20 +48,25 @@ async function Board() {
 function UserBar({ user }: { user: User }) {
   const initial = user.name.trim().charAt(0).toUpperCase() || "?";
   return (
-    <div className="mb-5 flex w-full max-w-5xl items-center justify-end gap-3 text-white">
-      <span className="flex size-8 items-center justify-center rounded-full bg-white font-display text-sm font-semibold text-club-red shadow">
+    // Pinned to the top-right corner of the page; on phones only the initial and the icon, so it clears the crest.
+    <div className="absolute top-4 right-4 flex items-center gap-2 text-white sm:top-6 sm:right-6 sm:gap-3">
+      <span
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white font-display text-sm font-semibold text-club-red shadow"
+        title={`${user.name} (${user.email})`}
+      >
         {initial}
       </span>
-      <span className="truncate text-sm font-medium" title={user.email}>
+      <span className="hidden max-w-48 truncate text-sm font-medium sm:inline" title={user.email}>
         {user.name}
       </span>
       <form action={signOut}>
         <button
           type="submit"
-          className="flex items-center gap-1.5 rounded-lg bg-black/20 px-3 py-1.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-black/30"
+          aria-label="Изход"
+          className="flex items-center gap-1.5 rounded-lg bg-black/20 px-2 py-1.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-black/30 sm:px-3"
         >
           <LogOut className="size-4" aria-hidden />
-          Изход
+          <span className="hidden sm:inline">Изход</span>
         </button>
       </form>
     </div>
@@ -70,12 +75,9 @@ function UserBar({ user }: { user: User }) {
 
 function BoardPlaceholder() {
   return (
-    <>
-      <div className="mb-5 h-8 w-full max-w-5xl" />
-      <div className="grid w-full max-w-5xl items-start gap-6 md:grid-cols-2" aria-busy>
-        <TodoList list="work" todos={null} />
-        <TodoList list="personal" todos={null} />
-      </div>
-    </>
+    <div className="grid w-full max-w-5xl items-start gap-6 md:grid-cols-2" aria-busy>
+      <TodoList list="work" todos={null} />
+      <TodoList list="personal" todos={null} />
+    </div>
   );
 }
