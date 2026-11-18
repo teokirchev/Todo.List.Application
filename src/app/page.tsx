@@ -1,5 +1,6 @@
 ﻿import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/app/actions";
 import { ClubCrest } from "@/components/club-emblem";
@@ -33,6 +34,8 @@ export default function Home() {
 }
 
 async function Board() {
+  // The session check compares its expiry with the current time, so it must run per request, never while prerendering.
+  await connection();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const todos = await getTodoLists(user.id);
