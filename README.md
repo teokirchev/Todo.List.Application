@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Todo List
 
-## Getting Started
+Work and personal todo lists in a red-and-white football club theme. Built with Next.js, stored in Postgres (Neon), with Google sign-in limited to an allow list of emails.
 
-First, run the development server:
+## How it works
+
+- **Sign-in:** Google OAuth (with PKCE) via [arctic](https://arcticjs.dev). Only emails in `ALLOWED_EMAILS` can sign in. Removing an email revokes access on the next request.
+- **Session:** an encrypted, HTTP-only cookie ([iron-session](https://github.com/vvo/iron-session)), valid for 30 days.
+- **Data:** Postgres via the [Neon serverless driver](https://neon.tech/docs/serverless/serverless-driver). Tables are created automatically on first use (`src/lib/db.ts`). Every query is scoped to the signed-in user.
+- **Mutations:** Server Actions (`src/app/actions.ts`) that re-check the session and validate input. The UI updates optimistically and then takes the server's answer.
+- **Old data:** todos saved in the browser (`localStorage`) by earlier versions are imported once after the first sign-in.
+
+## Setup
+
+### 1. Database
+
+In the Vercel project: **Storage → Create Database → Neon** and connect it to the project. This sets `DATABASE_URL`.
+
+### 2. Google OAuth client
+
+In [Google Cloud Console](https://console.cloud.google.com/):
+
+1. Create a project.
+2. **APIs & Services → OAuth consent screen**: user type *External*, fill in the app name and emails. The app asks only for `openid`, `email` and `profile`, so it can be published without verification.
+3. **Credentials → Create credentials → OAuth client ID → Web application**, with these authorized redirect URIs:
+   - `https://<your-domain>/auth/google/callback`
+   - `http://localhost:3000/auth/google/callback`
+4. Copy the client ID and secret.
+
+### 3. Environment variables
+
+Set these in Vercel (**Settings → Environment Variables**) and redeploy. See `.env.example`.
+
+| Name | Value |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` | From step 2 |
+| `GOOGLE_CLIENT_SECRET` | From step 2 |
+| `SESSION_SECRET` | Random string, 32+ characters |
+| `ALLOWED_EMAILS` | `me@gmail.com, friend@gmail.com` |
+| `APP_URL` | Optional, e.g. `https://your-app.vercel.app` |
+
+### 4. Local development
 
 ```bash
+cp .env.example .env.local   # fill in the values (or: npx vercel env pull .env.local)
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open http://localhost:3000.

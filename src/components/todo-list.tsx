@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState, useSyncExternalStore, type ComponentType, type FormEvent } from "react";
+import { useId, useRef, useState, type ComponentType, type FormEvent } from "react";
 import {
   Check,
   ChevronsDown,
@@ -14,10 +14,19 @@ import {
   Trophy,
 } from "lucide-react";
 import { Cannon } from "@/components/club-emblem";
-import { personalTodos, workTodos, type Todo, type TodoStore } from "@/lib/todo-store";
+import type { ListName, Todo } from "@/lib/todos";
+
+export type ListActions = {
+  add(title: string): void;
+  setCompleted(id: string, completed: boolean): void;
+  /** An empty title deletes the todo. */
+  rename(id: string, title: string): void;
+  remove(id: string): void;
+  setAll(completed: boolean): void;
+  clearCompleted(): void;
+};
 
 type Theme = {
-  store: TodoStore;
   title: string;
   subtitle: string;
   icon: ComponentType<{ className?: string }>;
@@ -36,7 +45,6 @@ type Theme = {
 
 const LISTS = {
   work: {
-    store: workTodos,
     title: "Работни",
     subtitle: "Първият отбор: проекти и срокове",
     icon: Cannon,
@@ -53,7 +61,6 @@ const LISTS = {
     hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
   },
   personal: {
-    store: personalTodos,
     title: "Лични",
     subtitle: "Извън Емирейтс: дом и семейство",
     icon: Shirt,
@@ -71,9 +78,7 @@ const LISTS = {
     accentText: "text-club-navy dark:text-club-gold",
     hover: "hover:bg-blue-50/70 dark:hover:bg-blue-500/5",
   },
-} satisfies Record<string, Theme>;
-
-export type ListName = keyof typeof LISTS;
+} satisfies Record<ListName, Theme>;
 
 type Filter = "all" | "active" | "completed";
 
@@ -88,19 +93,38 @@ function remainingLabel(count: number) {
   return count === 1 ? "1 оставаща" : `${count} оставащи`;
 }
 
-export function TodoList({ list, autoFocus = false }: { list: ListName; autoFocus?: boolean }) {
+const NO_ACTIONS: ListActions = {
+  add() {},
+  setCompleted() {},
+  rename() {},
+  remove() {},
+  setAll() {},
+  clearCompleted() {},
+};
+
+/** `todos` is null while the list is still loading; it then renders as a placeholder. */
+export function TodoList({
+  list,
+  todos,
+  actions = NO_ACTIONS,
+  autoFocus = false,
+}: {
+  list: ListName;
+  todos: Todo[] | null;
+  actions?: ListActions;
+  autoFocus?: boolean;
+}) {
   const theme: Theme = LISTS[list];
-  const { store, icon: Icon } = theme;
+  const { icon: Icon } = theme;
   const inputId = useId();
   const headingId = useId();
-  const todos = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState("");
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!draft.trim()) return;
-    store.add(draft);
+    actions.add(draft);
     setDraft("");
   }
 
@@ -183,7 +207,7 @@ export function TodoList({ list, autoFocus = false }: { list: ListName; autoFocu
         >
           <button
             type="button"
-            onClick={() => store.setAll(activeCount > 0)}
+            onClick={() => actions.setAll(activeCount > 0)}
             disabled={items.length === 0}
             aria-label={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
             title={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
@@ -201,7 +225,8 @@ export function TodoList({ list, autoFocus = false }: { list: ListName; autoFocu
             placeholder="Добави нова задача…"
             autoComplete="off"
             autoFocus={autoFocus}
-            className="min-w-0 flex-1 bg-transparent py-3 pr-3 text-base outline-none placeholder:text-zinc-400"
+            disabled={!loaded}
+            className="min-w-0 flex-1 bg-transparent py-3 pr-3 disabled:cursor-wait text-base outline-none placeholder:text-zinc-400"
           />
         </div>
         <button
@@ -247,12 +272,12 @@ export function TodoList({ list, autoFocus = false }: { list: ListName; autoFocu
               <Trophy className="size-5" aria-hidden />
               Победа! Всичко е свършено. COYG!
             </div>
-            {filter === "all" && <Items items={visible} theme={theme} />}
+            {filter === "all" && <Items items={visible} theme={theme} actions={actions} />}
           </>
         ) : visible.length === 0 ? (
           <EmptyState theme={theme} hasItems={items.length > 0} filter={filter} />
         ) : (
-          <Items items={visible} theme={theme} />
+          <Items items={visible} theme={theme} actions={actions} />
         )}
       </div>
 
@@ -260,7 +285,7 @@ export function TodoList({ list, autoFocus = false }: { list: ListName; autoFocu
         <footer className="flex justify-end border-t border-zinc-100 px-4 py-2 dark:border-zinc-900">
           <button
             type="button"
-            onClick={() => store.clearCompleted()}
+            onClick={() => actions.clearCompleted()}
             className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
           >
             <Eraser className="size-4" aria-hidden />
@@ -297,18 +322,17 @@ function EmptyState({ theme, hasItems, filter }: { theme: Theme; hasItems: boole
   );
 }
 
-function Items({ items, theme }: { items: Todo[]; theme: Theme }) {
+function Items({ items, theme, actions }: { items: Todo[]; theme: Theme; actions: ListActions }) {
   return (
     <ul className="space-y-1">
       {items.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} theme={theme} />
+        <TodoItem key={todo.id} todo={todo} theme={theme} actions={actions} />
       ))}
     </ul>
   );
 }
 
-function TodoItem({ todo, theme }: { todo: Todo; theme: Theme }) {
-  const { store } = theme;
+function TodoItem({ todo, theme, actions }: { todo: Todo; theme: Theme; actions: ListActions }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(todo.title);
   // Guards against a blur fired while the input unmounts after Enter/Escape.
@@ -324,7 +348,7 @@ function TodoItem({ todo, theme }: { todo: Todo; theme: Theme }) {
     if (doneRef.current) return;
     doneRef.current = true;
     setEditing(false);
-    if (commit && text.trim() !== todo.title) store.rename(todo.id, text);
+    if (commit && text.trim() !== todo.title) actions.rename(todo.id, text);
   }
 
   if (editing) {
@@ -355,7 +379,7 @@ function TodoItem({ todo, theme }: { todo: Todo; theme: Theme }) {
         <input
           type="checkbox"
           checked={todo.completed}
-          onChange={() => store.toggle(todo.id)}
+          onChange={() => actions.setCompleted(todo.id, !todo.completed)}
           aria-label={`Завършена: ${todo.title}`}
           className={`peer size-6 cursor-pointer appearance-none rounded-full border-2 outline-none ring-offset-2 transition focus-visible:ring-4 dark:ring-offset-zinc-950 ${theme.checkbox}`}
         />
@@ -385,7 +409,7 @@ function TodoItem({ todo, theme }: { todo: Todo; theme: Theme }) {
         </button>
         <button
           type="button"
-          onClick={() => store.remove(todo.id)}
+          onClick={() => actions.remove(todo.id)}
           aria-label={`Изтрий: ${todo.title}`}
           className="rounded-lg p-1.5 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         >
