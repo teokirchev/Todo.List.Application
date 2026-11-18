@@ -8,6 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  // Kept out of the public repo; set CONTACT_EMAIL in the hosting environment.
+  const contactEmail = process.env.CONTACT_EMAIL?.trim();
+
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-16">
       <article className="w-full max-w-2xl overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl shadow-black/25 dark:border-zinc-800 dark:bg-zinc-950">
@@ -47,7 +50,18 @@ export default function PrivacyPage() {
 
           <Section title="Изтриване">
             Можеш да изтриеш задачите си по всяко време от самото приложение. Ако искаш да бъде изтрит и акаунтът ти
-            заедно с всички данни, пиши на собственика на приложението.
+            заедно с всички данни, или имаш въпрос за данните си,{" "}
+            {contactEmail ? (
+              <>
+                пиши на{" "}
+                <a href={`mailto:${contactEmail}`} className="font-medium text-club-red hover:underline dark:text-red-400">
+                  {contactEmail}
+                </a>
+                .
+              </>
+            ) : (
+              "пиши на собственика на приложението."
+            )}
           </Section>
 
           <p className="pt-2">

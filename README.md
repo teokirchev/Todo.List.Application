@@ -38,6 +38,7 @@ Set these in Vercel (**Settings → Environment Variables**) and redeploy. See `
 | `SESSION_SECRET` | Random string, 32+ characters |
 | `ALLOWED_EMAILS` | `me@gmail.com, friend@gmail.com` |
 | `APP_URL` | Optional, e.g. `https://your-app.vercel.app` |
+| `CONTACT_EMAIL` | Optional, shown on `/privacy` for data requests |
 
 ### 4. Local development
 
