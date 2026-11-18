@@ -10,6 +10,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-oswald);
+
+  /* Club palette: red and white with navy and gold accents. */
+  --color-club-red: #ef0107;
+  --color-club-red-dark: #b5000b;
+  --color-club-navy: #063672;
+  --color-club-navy-dark: #031f45;
+  --color-club-gold: #c9a54c;
+
   --animate-todo-in: todo-in 220ms ease-out;
 }
 

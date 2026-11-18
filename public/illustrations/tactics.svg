@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <!-- board frame -->
+  <rect x="18" y="20" width="164" height="114" rx="10" fill="#f8fafc"/>
+  <rect x="18" y="20" width="164" height="114" rx="10" stroke="#0f172a" stroke-opacity=".15" stroke-width="2"/>
+  <!-- pitch with mowing stripes -->
+  <rect x="27" y="29" width="146" height="96" rx="5" fill="#15803d"/>
+  <g fill="#16a34a">
+    <rect x="45" y="29" width="18" height="96"/>
+    <rect x="81" y="29" width="18" height="96"/>
+    <rect x="117" y="29" width="18" height="96"/>
+    <rect x="153" y="29" width="18" height="96"/>
+  </g>
+  <g stroke="#fff" stroke-opacity=".85" stroke-width="1.5">
+    <rect x="33" y="35" width="134" height="84" rx="1.5"/>
+    <path d="M100 35v84"/>
+    <circle cx="100" cy="77" r="12"/>
+    <rect x="33" y="57" width="18" height="40"/>
+    <rect x="149" y="57" width="18" height="40"/>
+  </g>
+  <!-- passing arrows -->
+  <g stroke="#fde047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M84 75c10-12 20-17 30-18" stroke-dasharray="4 3.5"/>
+    <path d="m109 53 6 4-5 5"/>
+    <path d="M120 98c10 1 18-3 24-11" stroke-dasharray="4 3.5"/>
+    <path d="m138 85 7 1-1 7"/>
+  </g>
+  <!-- our players -->
+  <g fill="#ef0107" stroke="#fff" stroke-width="1.8">
+    <circle cx="44" cy="77" r="5"/>
+    <circle cx="62" cy="54" r="5"/>
+    <circle cx="62" cy="100" r="5"/>
+    <circle cx="82" cy="77" r="5"/>
+    <circle cx="118" cy="57" r="5"/>
+    <circle cx="118" cy="98" r="5"/>
+  </g>
+  <!-- opponents -->
+  <g stroke="#063672" stroke-width="2.8" stroke-linecap="round">
+    <path d="m135 66 6 6m0-6-6 6"/>
+    <path d="m147 80 6 6m0-6-6 6"/>
+    <path d="m131 102 6 6m0-6-6 6"/>
+  </g>
+  <!-- marker tray -->
+  <rect x="74" y="134" width="52" height="7" rx="3.5" fill="#e2e8f0"/>
+  <rect x="82" y="135.5" width="14" height="4" rx="2" fill="#ef0107"/>
+  <rect x="100" y="135.5" width="14" height="4" rx="2" fill="#063672"/>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <defs>
+    <pattern id="net" width="9" height="9" patternUnits="userSpaceOnUse">
+      <path d="M0 .5h9M.5 0v9" stroke="#fff" stroke-opacity=".45"/>
+    </pattern>
+    <clipPath id="ball">
+      <circle r="18"/>
+    </clipPath>
+  </defs>
+  <!-- grass -->
+  <ellipse cx="100" cy="131" rx="92" ry="13" fill="#16a34a"/>
+  <ellipse cx="100" cy="129" rx="70" ry="8" fill="#22c55e"/>
+  <!-- net -->
+  <path d="M36 44h128l-10 84H46z" fill="url(#net)"/>
+  <path d="M36 44 46 128M164 44l-10 84" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+  <!-- goal frame -->
+  <path d="M30 130V40h140v90" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- motion lines -->
+  <g stroke="#c9a54c" stroke-width="3" stroke-linecap="round">
+    <path d="M60 96h22M54 106h26M64 116h16"/>
+  </g>
+  <!-- ball -->
+  <g transform="translate(108 106) rotate(-12)">
+    <circle r="18" fill="#fff"/>
+    <g clip-path="url(#ball)" fill="#0f172a">
+      <path d="M0-6.5 6.18-2.01 3.82 5.26h-7.64l-2.36-7.27z"/>
+      <circle cx="10" cy="-13.75" r="5.5"/>
+      <circle cx="16.17" cy="5.25" r="5.5"/>
+      <circle cy="17" r="5.5"/>
+      <circle cx="-16.17" cy="5.25" r="5.5"/>
+      <circle cx="-10" cy="-13.75" r="5.5"/>
+    </g>
+    <g stroke="#0f172a" stroke-width="1.4">
+      <path d="M0-6.5V-18M6.18-2.01l10.9-3.55M3.82 5.26l6.76 9.3M-3.82 5.26l-6.76 9.3M-6.18-2.01l-10.9-3.55"/>
+    </g>
+    <circle r="18" stroke="#0f172a" stroke-width="1.6"/>
+  </g>
+</svg>
