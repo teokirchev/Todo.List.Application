@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import { Cannon, CannonPattern } from "@/components/club-emblem";
 import "./globals.css";
@@ -21,6 +21,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Задачи · The Gunners",
   description: "Работни и лични задачи в червено и бяло.",
+  appleWebApp: {
+    capable: true,
+    title: "Задачи",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+// Colours the browser bar / phone status bar in club red.
+export const viewport: Viewport = {
+  themeColor: "#ef0107",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
