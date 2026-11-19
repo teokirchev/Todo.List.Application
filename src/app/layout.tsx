@@ -32,12 +32,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="relative isolate flex min-h-full flex-col overflow-x-hidden">
         {/* Red-and-white background: red top with a slanted edge, white below with faint cannons */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <CannonPattern className="absolute inset-0 size-full text-club-red/6 dark:text-club-red/10" />
+          <CannonPattern className="absolute inset-0 size-full text-club-gold/20 dark:text-club-gold/15" />
           <div className="absolute inset-x-0 top-0 h-120 bg-club-red [clip-path:polygon(0_0,100%_0,100%_78%,0_100%)] sm:h-108">
             <div className="absolute inset-0 bg-linear-to-b from-club-red to-club-red-dark" />
             <div className="absolute inset-0 bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.06)_0_22px,transparent_22px_44px)]" />
-            <Cannon className="absolute top-10 -right-16 w-md text-white/8 sm:right-[4%]" />
-            <Cannon className="absolute top-36 -left-24 w-72 -scale-x-100 text-white/6 sm:left-[2%]" />
+            <Cannon className="absolute -top-16 -right-20 w-md text-club-gold sm:right-[3%]" />
+            <Cannon className="absolute top-16 -left-24 w-80 -scale-x-100 text-club-gold sm:left-[1%]" />
           </div>
         </div>
 

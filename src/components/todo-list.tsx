@@ -50,7 +50,7 @@ const LISTS = {
     icon: Cannon,
     image: "/illustrations/tactics.svg",
     header: "from-club-red to-club-red-dark",
-    badge: "bg-white text-club-red",
+    badge: "bg-white text-club-gold",
     bar: "bg-white",
     button: "bg-club-red shadow-club-red/30 hover:bg-club-red-dark",
     focus: "focus-within:border-club-red focus-within:ring-club-red/15 dark:focus-within:border-club-red",
