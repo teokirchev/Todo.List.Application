@@ -26,7 +26,7 @@ export async function getTodoLists(userId: string): Promise<TodoLists> {
   const rows = (await sql`
     select id, list, title, completed, created_at from todos
     where user_id = ${userId}
-    order by created_at, id
+    order by position nulls last, created_at, id
   `) as Row[];
   const lists: TodoLists = { work: [], personal: [] };
   for (const row of rows) lists[row.list].push(toTodo(row));
@@ -38,18 +38,46 @@ export async function getList(userId: string, list: ListName): Promise<Todo[]> {
   const rows = (await sql`
     select id, list, title, completed, created_at from todos
     where user_id = ${userId} and list = ${list}
-    order by created_at, id
+    order by position nulls last, created_at, id
   `) as Row[];
   return rows.map(toTodo);
 }
 
+/** New todos go to the bottom of their list. */
 export async function insertTodo(userId: string, list: ListName, id: string, title: string) {
   const sql = await db();
   await sql`
-    insert into todos (id, user_id, list, title)
-    values (${id}, ${userId}, ${list}, ${title})
+    insert into todos (id, user_id, list, title, position)
+    values (${id}, ${userId}, ${list}, ${title},
+            coalesce((select max(position) from todos where user_id = ${userId} and list = ${list}), 0) + 1)
     on conflict (id) do nothing
   `;
+}
+
+/**
+ * Swaps the priority of two todos in the same list. The list is renumbered 1..n first,
+ * so ties (e.g. from two tabs adding at once) can never make the swap a no-op.
+ */
+export async function swapPositions(userId: string, list: ListName, a: string, b: string) {
+  const sql = await db();
+  await sql.transaction([
+    sql`
+      update todos set position = ranked.rn
+      from (
+        select id, row_number() over (order by position nulls last, created_at, id) as rn
+        from todos where user_id = ${userId} and list = ${list}
+      ) ranked
+      where todos.id = ranked.id
+    `,
+    sql`
+      update todos t set position = case
+          when t.id = ${a} then (select position from todos where id = ${b} and user_id = ${userId} and list = ${list})
+          else (select position from todos where id = ${a} and user_id = ${userId} and list = ${list})
+        end
+      where t.id in (${a}, ${b}) and t.user_id = ${userId} and t.list = ${list}
+        and (select count(*) from todos where id in (${a}, ${b}) and user_id = ${userId} and list = ${list}) = 2
+    `,
+  ]);
 }
 
 export async function updateCompleted(userId: string, list: ListName, id: string, completed: boolean) {
@@ -91,9 +119,10 @@ export async function importTodos(userId: string, items: ImportItem[]) {
   await sql.transaction(
     items.map(
       (item) => sql`
-        insert into todos (id, user_id, list, title, completed, created_at)
+        insert into todos (id, user_id, list, title, completed, created_at, position)
         values (${newId()}, ${userId}, ${item.list}, ${item.title}, ${item.completed},
-                to_timestamp(${item.createdAt / 1000}))
+                to_timestamp(${item.createdAt / 1000}),
+                coalesce((select max(position) from todos where user_id = ${userId} and list = ${item.list}), 0) + 1)
       `,
     ),
   );

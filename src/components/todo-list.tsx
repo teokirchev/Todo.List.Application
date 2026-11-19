@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useId, useRef, useState, type ComponentType, type FormEvent } from "react";
 import {
   Check,
+  ArrowDown,
+  ArrowUp,
   ChevronsDown,
   Eraser,
   Goal,
@@ -24,6 +26,8 @@ export type ListActions = {
   remove(id: string): void;
   setAll(completed: boolean): void;
   clearCompleted(): void;
+  /** Exchanges the priority of two todos. */
+  swap(id: string, otherId: string): void;
 };
 
 type Theme = {
@@ -41,6 +45,7 @@ type Theme = {
   filterActive: string;
   accentText: string;
   hover: string;
+  arrowHover: string;
 };
 
 const LISTS = {
@@ -59,6 +64,7 @@ const LISTS = {
     filterActive: "aria-pressed:bg-club-red aria-pressed:text-white",
     accentText: "text-club-red dark:text-red-400",
     hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
+    arrowHover: "hover:bg-red-50 hover:text-club-red dark:hover:bg-red-500/10 dark:hover:text-red-400",
   },
   personal: {
     title: "Лични",
@@ -77,6 +83,8 @@ const LISTS = {
       "aria-pressed:bg-club-navy aria-pressed:text-white dark:aria-pressed:bg-club-gold dark:aria-pressed:text-club-navy-dark",
     accentText: "text-club-navy dark:text-club-gold",
     hover: "hover:bg-blue-50/70 dark:hover:bg-blue-500/5",
+    arrowHover:
+      "hover:bg-blue-50 hover:text-club-navy dark:hover:bg-club-gold/10 dark:hover:text-club-gold",
   },
 } satisfies Record<ListName, Theme>;
 
@@ -100,6 +108,7 @@ const NO_ACTIONS: ListActions = {
   remove() {},
   setAll() {},
   clearCompleted() {},
+  swap() {},
 };
 
 /** `todos` is null while the list is still loading; it then renders as a placeholder. */
@@ -322,17 +331,40 @@ function EmptyState({ theme, hasItems, filter }: { theme: Theme; hasItems: boole
   );
 }
 
+/**
+ * `items` are the todos on screen (after filtering), already in priority order.
+ * The arrows swap a todo with its neighbour on screen.
+ */
 function Items({ items, theme, actions }: { items: Todo[]; theme: Theme; actions: ListActions }) {
   return (
     <ul className="space-y-1">
-      {items.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} theme={theme} actions={actions} />
+      {items.map((todo, i) => (
+        <TodoItem
+          key={todo.id}
+          todo={todo}
+          prevId={items[i - 1]?.id}
+          nextId={items[i + 1]?.id}
+          theme={theme}
+          actions={actions}
+        />
       ))}
     </ul>
   );
 }
 
-function TodoItem({ todo, theme, actions }: { todo: Todo; theme: Theme; actions: ListActions }) {
+function TodoItem({
+  todo,
+  prevId,
+  nextId,
+  theme,
+  actions,
+}: {
+  todo: Todo;
+  prevId?: string;
+  nextId?: string;
+  theme: Theme;
+  actions: ListActions;
+}) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(todo.title);
   // Guards against a blur fired while the input unmounts after Enter/Escape.
@@ -374,7 +406,7 @@ function TodoItem({ todo, theme, actions }: { todo: Todo; theme: Theme; actions:
   }
 
   return (
-    <li className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors motion-safe:animate-todo-in ${theme.hover}`}>
+    <li className={`group flex items-center gap-3 rounded-xl py-2.5 pr-1.5 pl-3 transition-colors motion-safe:animate-todo-in ${theme.hover}`}>
       <span className="relative flex size-6 shrink-0 items-center justify-center">
         <input
           type="checkbox"
@@ -414,6 +446,32 @@ function TodoItem({ todo, theme, actions }: { todo: Todo; theme: Theme; actions:
           className="rounded-lg p-1.5 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         >
           <Trash className="size-4" aria-hidden />
+        </button>
+      </div>
+      <div
+        className="flex shrink-0 flex-col border-l border-zinc-200 pl-1.5 dark:border-zinc-800"
+        role="group"
+        aria-label={`Премести: ${todo.title}`}
+      >
+        <button
+          type="button"
+          onClick={() => prevId && actions.swap(todo.id, prevId)}
+          disabled={!prevId}
+          aria-label={`Премести нагоре: ${todo.title}`}
+          title="Нагоре"
+          className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
+        >
+          <ArrowUp className="size-4" strokeWidth={2.75} aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={() => nextId && actions.swap(todo.id, nextId)}
+          disabled={!nextId}
+          aria-label={`Премести надолу: ${todo.title}`}
+          title="Надолу"
+          className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
+        >
+          <ArrowDown className="size-4" strokeWidth={2.75} aria-hidden />
         </button>
       </div>
     </li>

@@ -11,6 +11,7 @@ import {
   renameTodo,
   setAllCompleted,
   setTodoCompleted,
+  swapTodos,
 } from "@/app/actions";
 import { TodoList, type ListActions } from "@/components/todo-list";
 import { apply, isTodo, LIST_NAMES, newId, normalizeTitle, type ListName, type Todo, type TodoLists } from "@/lib/todos";
@@ -109,6 +110,9 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
       },
       clearCompleted() {
         run(list, apply.clearCompleted, () => clearCompleted(list));
+      },
+      swap(id, otherId) {
+        run(list, (t) => apply.swap(t, id, otherId), () => swapTodos(list, id, otherId));
       },
     });
     return { work: make("work"), personal: make("personal") };

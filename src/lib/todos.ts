@@ -62,4 +62,13 @@ export const apply = {
   remove: (todos: Todo[], id: string) => todos.filter((t) => t.id !== id),
   setAll: (todos: Todo[], completed: boolean) => todos.map((t) => ({ ...t, completed })),
   clearCompleted: (todos: Todo[]) => todos.filter((t) => !t.completed),
+  /** Exchanges the places of two todos (used to move one up or down past its neighbour). */
+  swap: (todos: Todo[], a: string, b: string) => {
+    const i = todos.findIndex((t) => t.id === a);
+    const j = todos.findIndex((t) => t.id === b);
+    if (i < 0 || j < 0) return todos;
+    const next = [...todos];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  },
 };

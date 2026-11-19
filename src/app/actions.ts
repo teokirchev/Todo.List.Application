@@ -9,6 +9,7 @@ import {
   getTodoLists,
   importTodos,
   insertTodo,
+  swapPositions,
   updateAllCompleted,
   updateCompleted,
   updateTitle,
@@ -78,6 +79,15 @@ export async function clearCompleted(list: ListName): Promise<Todo[]> {
   const user = await requireUser();
   const l = parseList(list);
   await deleteCompleted(user.id, l);
+  return getList(user.id, l);
+}
+
+export async function swapTodos(list: ListName, id: string, otherId: string): Promise<Todo[]> {
+  const user = await requireUser();
+  const l = parseList(list);
+  const a = parseId(id);
+  const b = parseId(otherId);
+  if (a !== b) await swapPositions(user.id, l, a, b);
   return getList(user.id, l);
 }
 

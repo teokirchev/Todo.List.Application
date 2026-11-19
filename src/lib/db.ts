@@ -35,6 +35,17 @@ function ensureSchema(sql: Sql) {
         created_at timestamptz not null default now()
       )`,
       sql`create index if not exists todos_user_list_idx on todos (user_id, list, created_at)`,
+      // Priority order within a list (1 = top). Added later, so older rows are numbered by creation time.
+      sql`alter table todos add column if not exists position integer`,
+      sql`with ranked as (
+        select t.id,
+               row_number() over (partition by t.user_id, t.list order by t.created_at, t.id)
+                 + coalesce((select max(p.position) from todos p
+                             where p.user_id = t.user_id and p.list = t.list), 0) as rn
+        from todos t
+        where t.position is null
+      )
+      update todos set position = ranked.rn from ranked where todos.id = ranked.id`,
     ])
     .then(() => undefined);
 }
