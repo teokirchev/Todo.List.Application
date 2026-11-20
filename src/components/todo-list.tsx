@@ -14,6 +14,7 @@ import {
   ChevronsDown,
   Eraser,
   Goal,
+  MoreVertical,
   Pencil,
   Plus,
   Shirt,
@@ -452,6 +453,7 @@ function TodoItem({
   actions: ListActions;
 }) {
   const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [text, setText] = useState(todo.title);
   // Guards against a blur fired while the input unmounts after Enter/Escape.
   const doneRef = useRef(false);
@@ -528,7 +530,8 @@ function TodoItem({
       >
         {todo.title}
       </span>
-      <div className='flex shrink-0 gap-0.5 opacity-100 transition sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100'>
+      {/* Desktop: edit/delete on hover, small stacked arrows. Phones get the larger controls below. */}
+      <div className='hidden shrink-0 gap-0.5 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 sm:flex'>
         <button
           type='button'
           onClick={startEditing}
@@ -547,7 +550,7 @@ function TodoItem({
         </button>
       </div>
       <div
-        className='flex shrink-0 flex-col border-l border-zinc-200 pl-1.5 dark:border-zinc-800'
+        className='hidden shrink-0 flex-col border-l border-zinc-200 pl-1.5 sm:flex dark:border-zinc-800'
         role='group'
         aria-label={`Премести: ${todo.title}`}
       >
@@ -571,6 +574,80 @@ function TodoItem({
         >
           <ArrowDown className='size-4' strokeWidth={2.75} aria-hidden />
         </button>
+      </div>
+
+      {/* Phones: finger-sized (40px) move buttons side by side, edit/delete behind a ⋮ menu. */}
+      <div className='flex shrink-0 items-center gap-1 sm:hidden'>
+        <button
+          type='button'
+          onClick={() => prevId && actions.swap(todo.id, prevId)}
+          disabled={!prevId}
+          aria-label={`Премести нагоре: ${todo.title}`}
+          className={`flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 transition active:scale-90 disabled:opacity-25 dark:bg-zinc-900 dark:text-zinc-400 ${theme.arrowHover}`}
+        >
+          <ArrowUp className='size-5' strokeWidth={2.5} aria-hidden />
+        </button>
+        <button
+          type='button'
+          onClick={() => nextId && actions.swap(todo.id, nextId)}
+          disabled={!nextId}
+          aria-label={`Премести надолу: ${todo.title}`}
+          className={`flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 transition active:scale-90 disabled:opacity-25 dark:bg-zinc-900 dark:text-zinc-400 ${theme.arrowHover}`}
+        >
+          <ArrowDown className='size-5' strokeWidth={2.5} aria-hidden />
+        </button>
+        <div className='relative'>
+          <button
+            type='button'
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={`Още действия: ${todo.title}`}
+            aria-expanded={menuOpen}
+            aria-haspopup='menu'
+            className='flex size-10 items-center justify-center rounded-xl text-zinc-400 transition active:scale-90 active:bg-zinc-100 dark:active:bg-zinc-900'
+          >
+            <MoreVertical className='size-5' aria-hidden />
+          </button>
+          {menuOpen && (
+            <>
+              {/* Tapping anywhere outside closes the menu. */}
+              <button
+                type='button'
+                aria-label='Затвори менюто'
+                onClick={() => setMenuOpen(false)}
+                className='fixed inset-0 z-20 cursor-default'
+              />
+              <div
+                role='menu'
+                className='absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-xl bg-white py-1 shadow-xl ring-1 ring-black/10 dark:bg-zinc-900 dark:ring-white/10'
+              >
+                <button
+                  type='button'
+                  role='menuitem'
+                  onClick={() => {
+                    setMenuOpen(false);
+                    startEditing();
+                  }}
+                  className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm active:bg-zinc-100 dark:active:bg-zinc-800'
+                >
+                  <Pencil className='size-4 text-zinc-500' aria-hidden />
+                  Редактирай
+                </button>
+                <button
+                  type='button'
+                  role='menuitem'
+                  onClick={() => {
+                    setMenuOpen(false);
+                    actions.remove(todo.id);
+                  }}
+                  className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm text-red-600 active:bg-red-50 dark:text-red-400 dark:active:bg-red-500/10'
+                >
+                  <Trash className='size-4' aria-hidden />
+                  Изтрий
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </li>
   );
