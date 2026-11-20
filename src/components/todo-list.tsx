@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState, type ComponentType, type FormEvent } from "react";
 import {
-  Check,
+  useId,
+  useRef,
+  useState,
+  type ComponentType,
+  type FormEvent,
+} from "react";
+import {
   ArrowDown,
   ArrowUp,
   ChevronsDown,
@@ -15,7 +20,8 @@ import {
   Trash,
   Trophy,
 } from "lucide-react";
-import { Cannon } from "@/components/club-emblem";
+import { fireCannon } from "@/components/cannon-shot";
+import { Cannon, FootballIcon } from "@/components/club-emblem";
 import type { ListName, Todo } from "@/lib/todos";
 
 export type ListActions = {
@@ -41,7 +47,7 @@ type Theme = {
   bar: string;
   button: string;
   focus: string;
-  checkbox: string;
+  checkRing: string;
   filterActive: string;
   accentText: string;
   hover: string;
@@ -51,24 +57,25 @@ type Theme = {
 const LISTS = {
   work: {
     title: "Работни",
-    subtitle: "Първият отбор: проекти и срокове",
+    subtitle: "Emirates: проекти и срокове",
     icon: Cannon,
     image: "/illustrations/tactics.svg",
     header: "from-club-red to-club-red-dark",
     badge: "bg-white text-club-gold",
     bar: "bg-white",
     button: "bg-club-red shadow-club-red/30 hover:bg-club-red-dark",
-    focus: "focus-within:border-club-red focus-within:ring-club-red/15 dark:focus-within:border-club-red",
-    checkbox:
-      "border-red-300 hover:border-club-red checked:border-club-red checked:bg-club-red focus-visible:ring-club-red/40 dark:border-red-900",
+    focus:
+      "focus-within:border-club-red focus-within:ring-club-red/15 dark:focus-within:border-club-red",
+    checkRing: "focus-visible:ring-club-red/40",
     filterActive: "aria-pressed:bg-club-red aria-pressed:text-white",
     accentText: "text-club-red dark:text-red-400",
     hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
-    arrowHover: "hover:bg-red-50 hover:text-club-red dark:hover:bg-red-500/10 dark:hover:text-red-400",
+    arrowHover:
+      "hover:bg-red-50 hover:text-club-red dark:hover:bg-red-500/10 dark:hover:text-red-400",
   },
   personal: {
     title: "Лични",
-    subtitle: "Извън Емирейтс: дом и семейство",
+    subtitle: "Извън Emirates: дом и семейство",
     icon: Shirt,
     image: "/illustrations/goal.svg",
     header: "from-club-navy to-club-navy-dark",
@@ -76,9 +83,10 @@ const LISTS = {
     bar: "bg-club-gold",
     button:
       "bg-club-navy shadow-club-navy/30 hover:bg-club-navy-dark dark:bg-club-gold dark:text-club-navy-dark dark:shadow-club-gold/20 dark:hover:bg-[#b8933d]",
-    focus: "focus-within:border-club-navy focus-within:ring-club-navy/15 dark:focus-within:border-club-gold dark:focus-within:ring-club-gold/15",
-    checkbox:
-      "border-blue-300 hover:border-club-navy checked:border-club-navy checked:bg-club-navy focus-visible:ring-club-navy/40 dark:border-blue-900 dark:hover:border-club-gold dark:checked:border-club-gold dark:checked:bg-club-gold dark:focus-visible:ring-club-gold/40",
+    focus:
+      "focus-within:border-club-navy focus-within:ring-club-navy/15 dark:focus-within:border-club-gold dark:focus-within:ring-club-gold/15",
+    checkRing:
+      "focus-visible:ring-club-navy/40 dark:focus-visible:ring-club-gold/40",
     filterActive:
       "aria-pressed:bg-club-navy aria-pressed:text-white dark:aria-pressed:bg-club-gold dark:aria-pressed:text-club-navy-dark",
     accentText: "text-club-navy dark:text-club-gold",
@@ -141,7 +149,8 @@ export function TodoList({
   const items = todos ?? [];
   const activeCount = items.filter((t) => !t.completed).length;
   const completedCount = items.length - activeCount;
-  const percent = items.length === 0 ? 0 : Math.round((completedCount / items.length) * 100);
+  const percent =
+    items.length === 0 ? 0 : Math.round((completedCount / items.length) * 100);
   const allDone = items.length > 0 && activeCount === 0;
   const visible = items.filter((t) =>
     filter === "all" ? true : filter === "active" ? !t.completed : t.completed,
@@ -150,47 +159,61 @@ export function TodoList({
   return (
     <section
       aria-labelledby={headingId}
-      className="w-full min-w-0 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl shadow-black/25 dark:border-zinc-800 dark:bg-zinc-950"
+      className='w-full min-w-0 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl shadow-black/25 dark:border-zinc-800 dark:bg-zinc-950'
     >
-      <header className={`relative flex items-center gap-4 overflow-hidden bg-linear-to-br px-6 pt-6 pb-5 text-white ${theme.header}`}>
+      <header
+        className={`relative flex items-center gap-4 overflow-hidden bg-linear-to-br px-6 pt-6 pb-5 text-white ${theme.header}`}
+      >
         {/* Subtle diagonal kit stripes */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.05)_0_14px,transparent_14px_28px)]"
+          className='pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.05)_0_14px,transparent_14px_28px)]'
         />
-        <div className="relative min-w-0 flex-1">
-          <div className="flex items-center gap-3">
-            <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl shadow-lg ${theme.badge}`}>
-              <Icon className="size-7" />
+        <div className='relative min-w-0 flex-1'>
+          <div className='flex items-center gap-3'>
+            <span
+              className={`flex size-11 shrink-0 items-center justify-center rounded-xl shadow-lg ${theme.badge}`}
+            >
+              <Icon className='size-7' />
             </span>
-            <div className="min-w-0">
-              <h2 id={headingId} className="font-display text-2xl leading-tight font-semibold tracking-wide uppercase">
+            <div className='min-w-0'>
+              <h2
+                id={headingId}
+                className='font-display text-2xl leading-tight font-semibold tracking-wide uppercase'
+              >
                 {theme.title}
               </h2>
-              <p className="truncate text-sm text-white/75">{theme.subtitle}</p>
+              <p className='truncate text-sm text-white/75'>{theme.subtitle}</p>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className='mt-4 flex items-center gap-4'>
             <div
-              className="flex items-center gap-2 rounded-xl bg-black/30 px-3 py-1.5 font-display ring-1 ring-white/10"
-              aria-label={loaded ? `${completedCount} завършени, ${activeCount} оставащи` : undefined}
+              className='flex items-center gap-2 rounded-xl bg-black/30 px-3 py-1.5 font-display ring-1 ring-white/10'
+              aria-label={
+                loaded
+                  ? `${completedCount} завършени, ${activeCount} оставащи`
+                  : undefined
+              }
             >
-              <ScoreCell value={loaded ? completedCount : null} label="Готови" />
-              <span className="pb-3 text-2xl text-white/50">:</span>
-              <ScoreCell value={loaded ? activeCount : null} label="Остават" />
+              <ScoreCell
+                value={loaded ? completedCount : null}
+                label='Готови'
+              />
+              <span className='pb-3 text-2xl text-white/50'>:</span>
+              <ScoreCell value={loaded ? activeCount : null} label='Остават' />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 text-right font-display text-sm tracking-wide text-white/80">
+            <div className='min-w-0 flex-1'>
+              <div className='mb-1 text-right font-display text-sm tracking-wide text-white/80'>
                 {loaded ? `${percent}%` : " "}
               </div>
               <div
-                role="progressbar"
+                role='progressbar'
                 aria-label={`Прогрес: ${theme.title}`}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={percent}
-                className="h-2 overflow-hidden rounded-full bg-black/25"
+                className='h-2 overflow-hidden rounded-full bg-black/25'
               >
                 <div
                   className={`h-full rounded-full transition-[width] duration-500 ease-out ${theme.bar}`}
@@ -202,60 +225,75 @@ export function TodoList({
         </div>
         <Image
           src={theme.image}
-          alt=""
+          alt=''
           width={200}
           height={160}
-          loading="eager"
-          className="relative hidden w-32 shrink-0 drop-shadow-lg sm:block"
+          loading='eager'
+          className='relative hidden w-32 shrink-0 drop-shadow-lg sm:block'
         />
       </header>
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 pt-4">
+      <form
+        onSubmit={handleSubmit}
+        className='flex items-center gap-2 px-4 pt-4'
+      >
         <div
           className={`flex min-w-0 flex-1 items-center gap-1 rounded-2xl border border-zinc-200 bg-white pl-1 ring-4 ring-transparent transition dark:border-zinc-800 dark:bg-zinc-900 ${theme.focus}`}
         >
           <button
-            type="button"
+            type='button'
             onClick={() => actions.setAll(activeCount > 0)}
             disabled={items.length === 0}
-            aria-label={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
-            title={activeCount > 0 ? "Маркирай всички като завършени" : "Маркирай всички като активни"}
-            className="flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-0 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            aria-label={
+              activeCount > 0
+                ? "Маркирай всички като завършени"
+                : "Маркирай всички като активни"
+            }
+            title={
+              activeCount > 0
+                ? "Маркирай всички като завършени"
+                : "Маркирай всички като активни"
+            }
+            className='flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-0 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
           >
-            <ChevronsDown className="size-5" aria-hidden />
+            <ChevronsDown className='size-5' aria-hidden />
           </button>
-          <label htmlFor={inputId} className="sr-only">
+          <label htmlFor={inputId} className='sr-only'>
             Нова задача: {theme.title}
           </label>
           <input
             id={inputId}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Добави нова задача…"
-            autoComplete="off"
+            placeholder='Добави нова задача…'
+            autoComplete='off'
             autoFocus={autoFocus}
             disabled={!loaded}
-            className="min-w-0 flex-1 bg-transparent py-3 pr-3 disabled:cursor-wait text-base outline-none placeholder:text-zinc-400"
+            className='min-w-0 flex-1 bg-transparent py-3 pr-3 disabled:cursor-wait text-base outline-none placeholder:text-zinc-400'
           />
         </div>
         <button
-          type="submit"
+          type='submit'
           disabled={!draft.trim()}
-          aria-label="Добави"
+          aria-label='Добави'
           className={`flex h-12 shrink-0 items-center gap-1.5 rounded-2xl px-4 font-display font-medium tracking-wide text-white uppercase shadow-lg transition active:scale-95 disabled:opacity-40 disabled:shadow-none ${theme.button}`}
         >
-          <Plus className="size-5" aria-hidden />
-          <span className="hidden sm:inline">Добави</span>
+          <Plus className='size-5' aria-hidden />
+          <span className='hidden sm:inline'>Добави</span>
         </button>
       </form>
 
       {loaded && items.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
-          <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-900" role="group" aria-label={`Филтър: ${theme.title}`}>
+        <div className='flex flex-wrap items-center justify-between gap-2 px-4 pt-4'>
+          <div
+            className='flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-900'
+            role='group'
+            aria-label={`Филтър: ${theme.title}`}
+          >
             {FILTERS.map((f) => (
               <button
                 key={f.value}
-                type="button"
+                type='button'
                 onClick={() => setFilter(f.value)}
                 aria-pressed={filter === f.value}
                 className={`rounded-lg px-3 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 aria-pressed:shadow-sm dark:text-zinc-400 dark:hover:text-zinc-100 ${theme.filterActive}`}
@@ -264,40 +302,51 @@ export function TodoList({
               </button>
             ))}
           </div>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">{remainingLabel(activeCount)}</span>
+          <span className='text-sm text-zinc-500 dark:text-zinc-400'>
+            {remainingLabel(activeCount)}
+          </span>
         </div>
       )}
 
-      <div className="px-2 py-3">
+      <div className='px-2 py-3'>
         {!loaded ? (
-          <div className="space-y-2 px-2 py-1" aria-label="Зареждане">
+          <div className='space-y-2 px-2 py-1' aria-label='Зареждане'>
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-11 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900" />
+              <div
+                key={i}
+                className='h-11 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900'
+              />
             ))}
           </div>
         ) : allDone && filter !== "completed" ? (
           <>
-            <div className="mx-2 mb-2 flex items-center gap-2 rounded-xl bg-club-gold/15 px-3 py-2 font-display tracking-wide text-[#8a6d24] uppercase dark:text-club-gold">
-              <Trophy className="size-5" aria-hidden />
+            <div className='mx-2 mb-2 flex items-center gap-2 rounded-xl bg-club-gold/15 px-3 py-2 font-display tracking-wide text-[#8a6d24] uppercase dark:text-club-gold'>
+              <Trophy className='size-5' aria-hidden />
               Победа! Всичко е свършено. COYG!
             </div>
-            {filter === "all" && <Items items={visible} theme={theme} actions={actions} />}
+            {filter === "all" && (
+              <Items items={visible} theme={theme} actions={actions} />
+            )}
           </>
         ) : visible.length === 0 ? (
-          <EmptyState theme={theme} hasItems={items.length > 0} filter={filter} />
+          <EmptyState
+            theme={theme}
+            hasItems={items.length > 0}
+            filter={filter}
+          />
         ) : (
           <Items items={visible} theme={theme} actions={actions} />
         )}
       </div>
 
       {loaded && completedCount > 0 && (
-        <footer className="flex justify-end border-t border-zinc-100 px-4 py-2 dark:border-zinc-900">
+        <footer className='flex justify-end border-t border-zinc-100 px-4 py-2 dark:border-zinc-900'>
           <button
-            type="button"
+            type='button'
             onClick={() => actions.clearCompleted()}
-            className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+            className='flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100'
           >
-            <Eraser className="size-4" aria-hidden />
+            <Eraser className='size-4' aria-hidden />
             Изчисти завършените ({completedCount})
           </button>
         </footer>
@@ -308,25 +357,37 @@ export function TodoList({
 
 function ScoreCell({ value, label }: { value: number | null; label: string }) {
   return (
-    <div className="flex min-w-10 flex-col items-center" aria-hidden>
-      <span className="text-3xl leading-none font-semibold tabular-nums">{value ?? "–"}</span>
-      <span className="mt-0.5 text-[10px] tracking-widest text-white/60 uppercase">{label}</span>
+    <div className='flex min-w-10 flex-col items-center' aria-hidden>
+      <span className='text-3xl leading-none font-semibold tabular-nums'>
+        {value ?? "–"}
+      </span>
+      <span className='mt-0.5 text-[10px] tracking-widest text-white/60 uppercase'>
+        {label}
+      </span>
     </div>
   );
 }
 
-function EmptyState({ theme, hasItems, filter }: { theme: Theme; hasItems: boolean; filter: Filter }) {
+function EmptyState({
+  theme,
+  hasItems,
+  filter,
+}: {
+  theme: Theme;
+  hasItems: boolean;
+  filter: Filter;
+}) {
   const text = !hasItems
     ? "Няма задачи – мачът още не е започнал."
     : filter === "completed"
       ? "Още няма отбелязани голове."
       : "Няма задачи тук.";
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
+    <div className='flex flex-col items-center gap-3 px-6 py-8 text-center'>
+      <span className='flex size-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900'>
         <Goal className={`size-7 ${theme.accentText}`} aria-hidden />
       </span>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{text}</p>
+      <p className='text-sm text-zinc-500 dark:text-zinc-400'>{text}</p>
     </div>
   );
 }
@@ -335,9 +396,17 @@ function EmptyState({ theme, hasItems, filter }: { theme: Theme; hasItems: boole
  * `items` are the todos on screen (after filtering), already in priority order.
  * The arrows swap a todo with its neighbour on screen.
  */
-function Items({ items, theme, actions }: { items: Todo[]; theme: Theme; actions: ListActions }) {
+function Items({
+  items,
+  theme,
+  actions,
+}: {
+  items: Todo[];
+  theme: Theme;
+  actions: ListActions;
+}) {
   return (
-    <ul className="space-y-1">
+    <ul className='space-y-1'>
       {items.map((todo, i) => (
         <TodoItem
           key={todo.id}
@@ -385,8 +454,8 @@ function TodoItem({
 
   if (editing) {
     return (
-      <li className="px-2 py-1">
-        <label htmlFor={`edit-${todo.id}`} className="sr-only">
+      <li className='px-2 py-1'>
+        <label htmlFor={`edit-${todo.id}`} className='sr-only'>
           Редактирай задачата
         </label>
         <input
@@ -406,72 +475,83 @@ function TodoItem({
   }
 
   return (
-    <li className={`group flex items-center gap-3 rounded-xl py-2.5 pr-1.5 pl-3 transition-colors motion-safe:animate-todo-in ${theme.hover}`}>
-      <span className="relative flex size-6 shrink-0 items-center justify-center">
+    <li
+      className={`group flex items-center gap-3 rounded-xl py-2.5 pr-1.5 pl-3 transition-colors motion-safe:animate-todo-in ${theme.hover}`}
+    >
+      {/* The checkbox is a football: faint while open, solid and rolled in once done. */}
+      <span className='relative flex size-7 shrink-0 items-center justify-center'>
         <input
-          type="checkbox"
+          type='checkbox'
           checked={todo.completed}
-          onChange={() => actions.setCompleted(todo.id, !todo.completed)}
+          onChange={(e) => {
+            if (!todo.completed) {
+              // Celebrate: fire across the row, from the checkbox to the action buttons.
+              const box = e.currentTarget.getBoundingClientRect();
+              const row = e.currentTarget
+                .closest("li")
+                ?.getBoundingClientRect();
+              fireCannon(box, row ? row.right - box.left - 90 : 200);
+            }
+            actions.setCompleted(todo.id, !todo.completed);
+          }}
           aria-label={`Завършена: ${todo.title}`}
-          className={`peer size-6 cursor-pointer appearance-none rounded-full border-2 outline-none ring-offset-2 transition focus-visible:ring-4 dark:ring-offset-zinc-950 ${theme.checkbox}`}
+          className={`peer absolute inset-0 z-10 size-7 cursor-pointer appearance-none rounded-full outline-none ring-offset-2 focus-visible:ring-4 dark:ring-offset-zinc-950 ${theme.checkRing}`}
         />
-        <Check
-          className="pointer-events-none absolute size-3.5 scale-50 text-white opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100"
-          strokeWidth={3.5}
-          aria-hidden
-        />
+        <FootballIcon className='pointer-events-none size-7 opacity-25 transition duration-200 peer-hover:opacity-55 peer-checked:opacity-100 peer-checked:drop-shadow-md motion-safe:peer-checked:animate-ball-in' />
       </span>
       <span
         onDoubleClick={startEditing}
-        title="Двоен клик за редакция"
+        title='Двоен клик за редакция'
         className={`min-w-0 flex-1 wrap-break-word transition-colors ${
-          todo.completed ? "text-zinc-400 line-through decoration-zinc-300 dark:text-zinc-500 dark:decoration-zinc-600" : ""
+          todo.completed
+            ? "text-zinc-400 line-through decoration-zinc-300 dark:text-zinc-500 dark:decoration-zinc-600"
+            : ""
         }`}
       >
         {todo.title}
       </span>
-      <div className="flex shrink-0 gap-0.5 opacity-100 transition sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+      <div className='flex shrink-0 gap-0.5 opacity-100 transition sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100'>
         <button
-          type="button"
+          type='button'
           onClick={startEditing}
           aria-label={`Редактирай: ${todo.title}`}
-          className="rounded-lg p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
+          className='rounded-lg p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
         >
-          <Pencil className="size-4" aria-hidden />
+          <Pencil className='size-4' aria-hidden />
         </button>
         <button
-          type="button"
+          type='button'
           onClick={() => actions.remove(todo.id)}
           aria-label={`Изтрий: ${todo.title}`}
-          className="rounded-lg p-1.5 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+          className='rounded-lg p-1.5 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400'
         >
-          <Trash className="size-4" aria-hidden />
+          <Trash className='size-4' aria-hidden />
         </button>
       </div>
       <div
-        className="flex shrink-0 flex-col border-l border-zinc-200 pl-1.5 dark:border-zinc-800"
-        role="group"
+        className='flex shrink-0 flex-col border-l border-zinc-200 pl-1.5 dark:border-zinc-800'
+        role='group'
         aria-label={`Премести: ${todo.title}`}
       >
         <button
-          type="button"
+          type='button'
           onClick={() => prevId && actions.swap(todo.id, prevId)}
           disabled={!prevId}
           aria-label={`Премести нагоре: ${todo.title}`}
-          title="Нагоре"
+          title='Нагоре'
           className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
         >
-          <ArrowUp className="size-4" strokeWidth={2.75} aria-hidden />
+          <ArrowUp className='size-4' strokeWidth={2.75} aria-hidden />
         </button>
         <button
-          type="button"
+          type='button'
           onClick={() => nextId && actions.swap(todo.id, nextId)}
           disabled={!nextId}
           aria-label={`Премести надолу: ${todo.title}`}
-          title="Надолу"
+          title='Надолу'
           className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
         >
-          <ArrowDown className="size-4" strokeWidth={2.75} aria-hidden />
+          <ArrowDown className='size-4' strokeWidth={2.75} aria-hidden />
         </button>
       </div>
     </li>

@@ -13,6 +13,7 @@ import {
   setTodoCompleted,
   swapTodos,
 } from "@/app/actions";
+import { CannonLayer } from "@/components/cannon-shot";
 import { TodoList, type ListActions } from "@/components/todo-list";
 import { apply, isTodo, LIST_NAMES, newId, normalizeTitle, type ListName, type Todo, type TodoLists } from "@/lib/todos";
 
@@ -136,6 +137,7 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
 
   return (
     <>
+      <CannonLayer />
       {error && (
         <div
           role="alert"
