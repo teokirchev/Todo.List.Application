@@ -14,6 +14,7 @@ import {
   swapTodos,
 } from "@/app/actions";
 import { CannonLayer } from "@/components/cannon-shot";
+import { VictoryLayer } from "@/components/victory";
 import { TodoList, type ListActions } from "@/components/todo-list";
 import { apply, isTodo, LIST_NAMES, newId, normalizeTitle, type ListName, type Todo, type TodoLists } from "@/lib/todos";
 
@@ -138,6 +139,7 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
   return (
     <>
       <CannonLayer />
+      <VictoryLayer />
       {error && (
         <div
           role="alert"

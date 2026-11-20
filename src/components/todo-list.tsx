@@ -21,6 +21,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { fireCannon } from "@/components/cannon-shot";
+import { celebrateVictory } from "@/components/victory";
 import { Cannon, FootballIcon } from "@/components/club-emblem";
 import type { ListName, Todo } from "@/lib/todos";
 
@@ -242,7 +243,11 @@ export function TodoList({
         >
           <button
             type='button'
-            onClick={() => actions.setAll(activeCount > 0)}
+            onClick={() => {
+              // Marking all as done finishes the list too.
+              if (activeCount > 0) celebrateVictory(list);
+              actions.setAll(activeCount > 0);
+            }}
             disabled={items.length === 0}
             aria-label={
               activeCount > 0
@@ -325,7 +330,7 @@ export function TodoList({
               Победа! Всичко е свършено. COYG!
             </div>
             {filter === "all" && (
-              <Items items={visible} theme={theme} actions={actions} />
+              <Items list={list} items={visible} activeCount={activeCount} theme={theme} actions={actions} />
             )}
           </>
         ) : visible.length === 0 ? (
@@ -335,7 +340,7 @@ export function TodoList({
             filter={filter}
           />
         ) : (
-          <Items items={visible} theme={theme} actions={actions} />
+          <Items list={list} items={visible} activeCount={activeCount} theme={theme} actions={actions} />
         )}
       </div>
 
@@ -397,11 +402,16 @@ function EmptyState({
  * The arrows swap a todo with its neighbour on screen.
  */
 function Items({
+  list,
   items,
+  activeCount,
   theme,
   actions,
 }: {
+  list: ListName;
   items: Todo[];
+  /** Open todos in the whole list (not just on screen). */
+  activeCount: number;
   theme: Theme;
   actions: ListActions;
 }) {
@@ -410,7 +420,9 @@ function Items({
       {items.map((todo, i) => (
         <TodoItem
           key={todo.id}
+          list={list}
           todo={todo}
+          isLastOpen={!todo.completed && activeCount === 1}
           prevId={items[i - 1]?.id}
           nextId={items[i + 1]?.id}
           theme={theme}
@@ -422,13 +434,18 @@ function Items({
 }
 
 function TodoItem({
+  list,
   todo,
+  isLastOpen,
   prevId,
   nextId,
   theme,
   actions,
 }: {
+  list: ListName;
   todo: Todo;
+  /** Ticking this one off finishes the whole list. */
+  isLastOpen: boolean;
   prevId?: string;
   nextId?: string;
   theme: Theme;
@@ -491,6 +508,7 @@ function TodoItem({
                 .closest("li")
                 ?.getBoundingClientRect();
               fireCannon(box, row ? row.right - box.left - 90 : 200);
+              if (isLastOpen) celebrateVictory(list);
             }
             actions.setCompleted(todo.id, !todo.completed);
           }}

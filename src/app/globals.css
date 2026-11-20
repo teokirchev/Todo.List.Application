@@ -95,6 +95,74 @@
   100% { opacity: 0; transform: translateY(-12px) scale(1) rotate(-3deg); }
 }
 
+/* Victory overlay (src/components/victory.tsx) when a whole list is done. */
+.victory-backdrop {
+  animation: victory-fade-in 300ms ease-out both;
+}
+.victory-backdrop.victory-leaving {
+  animation: victory-fade-out 400ms ease-in both;
+}
+@keyframes victory-fade-in {
+  from { opacity: 0; }
+}
+@keyframes victory-fade-out {
+  to { opacity: 0; }
+}
+
+.victory-trophy {
+  animation: victory-trophy 900ms cubic-bezier(0.34, 1.56, 0.64, 1) 150ms both;
+}
+@keyframes victory-trophy {
+  0% { opacity: 0; transform: translateY(60px) scale(0.3) rotate(-12deg); }
+  60% { opacity: 1; transform: translateY(-10px) scale(1.12) rotate(4deg); }
+  100% { transform: none; }
+}
+
+.victory-rays {
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: repeating-conic-gradient(from 0deg, rgb(245 217 122 / 0.35) 0deg 10deg, transparent 10deg 24deg);
+  mask-image: radial-gradient(circle, #000 18%, transparent 68%);
+  animation: victory-rays-in 700ms ease-out 200ms both, victory-rays-spin 14s linear infinite;
+}
+@keyframes victory-rays-in {
+  from { opacity: 0; scale: 0.4; }
+}
+@keyframes victory-rays-spin {
+  to { rotate: 360deg; }
+}
+
+.victory-title {
+  text-shadow: 0 3px 0 #b5000b, 0 8px 24px rgb(0 0 0 / 0.5);
+  animation: victory-text 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 550ms both;
+}
+.victory-subtitle {
+  animation: victory-text 500ms ease-out 800ms both;
+}
+@keyframes victory-text {
+  from { opacity: 0; transform: translateY(16px) scale(0.9); }
+}
+
+.victory-confetti {
+  translate: 0 -24px;
+  animation-name: victory-confetti;
+  animation-timing-function: cubic-bezier(0.25, 0.6, 0.5, 1);
+  animation-fill-mode: both;
+}
+@keyframes victory-confetti {
+  from { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  to { transform: translate(var(--drift), 108vh) rotate(var(--spin)); opacity: 0; }
+}
+
+/* Reduced motion: show the trophy and text without movement. */
+.victory-still .victory-trophy,
+.victory-still .victory-rays,
+.victory-still .victory-title,
+.victory-still .victory-subtitle {
+  animation: none;
+}
+
 /* The football rolls in when a todo is ticked off. */
 @keyframes ball-in {
   from {
