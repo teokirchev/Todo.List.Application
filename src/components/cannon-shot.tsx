@@ -6,29 +6,39 @@ import { Cannon, FootballIcon } from "@/components/club-emblem";
 // A one-off celebration: when a todo is ticked off, the cannon appears beside it, recoils,
 // and fires a football across the row, which lands with a "ГОЛ!".
 
-type Shot = { id: number; x: number; y: number; distance: number };
+/** `x`/`y` is where the muzzle sits on screen; `size` is the cannon's box in px. */
+type Shot = { id: number; x: number; y: number; distance: number; size: number };
 type ShotRequest = Omit<Shot, "id">;
 
 const listeners = new Set<(shot: ShotRequest) => void>();
 let nextId = 0;
 
-/** Size of the cannon artwork, and where its muzzle sits inside it (measured on cannon.svg). */
-const CANNON = 100;
-const MUZZLE_X = CANNON * 0.82;
-const MUZZLE_Y = CANNON * 0.41;
+/** Cannon size (smaller on phones), and where its muzzle sits inside the image (measured on cannon.svg). */
+const CANNON_DESKTOP = 100;
+const CANNON_PHONE = 72;
+const MUZZLE_X = 0.82;
+const MUZZLE_Y = 0.41;
+/** Keeps the cannon this far from the left edge of the screen. */
+const EDGE_GAP = 4;
 /** Length of the whole celebration; also drives the CSS animations through --shot-duration. */
 const DURATION_MS = 3000;
 
 /**
  * Fires the cannon from just left of `origin` (the checkbox), shooting `distance` px to the right.
- * Does nothing for people who prefer reduced motion.
+ * On narrow screens the cannon is smaller and is pushed right so it never goes off screen;
+ * the flight gets shorter by the same amount. Does nothing for people who prefer reduced motion.
  */
 export function fireCannon(origin: DOMRect, distance: number) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const size = window.innerWidth < 640 ? CANNON_PHONE : CANNON_DESKTOP;
+  const wanted = origin.left - 6;
+  const minMuzzle = EDGE_GAP + size * MUZZLE_X;
+  const shift = Math.max(0, minMuzzle - wanted);
   const shot = {
-    x: origin.left,
+    x: wanted + shift,
     y: origin.top + origin.height / 2,
-    distance: Math.max(80, distance),
+    distance: Math.max(60, distance - shift),
+    size,
   };
   listeners.forEach((listener) => listener(shot));
 }
@@ -64,11 +74,10 @@ export function CannonLayer() {
   );
 }
 
-function CannonShot({ x, y, distance }: Shot) {
-  // The muzzle sits just left of the checkbox; everything else is placed relative to it.
-  const muzzleLeft = x - 6;
+function CannonShot({ x, y, distance, size }: Shot) {
+  // Everything is placed relative to the muzzle.
   const style = {
-    left: muzzleLeft,
+    left: x,
     top: y,
     "--dist": `${distance}px`,
     "--shot-duration": `${DURATION_MS}ms`,
@@ -79,10 +88,10 @@ function CannonShot({ x, y, distance }: Shot) {
       <div
         className='cannon-shot-cannon absolute'
         style={{
-          left: -MUZZLE_X,
-          top: -MUZZLE_Y,
-          width: CANNON,
-          height: CANNON,
+          left: -size * MUZZLE_X,
+          top: -size * MUZZLE_Y,
+          width: size,
+          height: size,
         }}
       >
         <Cannon className='size-full text-club-gold' />
