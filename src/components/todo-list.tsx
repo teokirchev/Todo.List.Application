@@ -53,7 +53,9 @@ type Theme = {
   filterActive: string;
   accentText: string;
   hover: string;
-  arrowHover: string;
+  /** Left stripe on each todo: faint while open, full colour once done. */
+  stripe: string;
+  stripeFaint: string;
 };
 
 const LISTS = {
@@ -72,8 +74,8 @@ const LISTS = {
     filterActive: "aria-pressed:bg-club-red aria-pressed:text-white",
     accentText: "text-club-red dark:text-red-400",
     hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
-    arrowHover:
-      "hover:bg-red-50 hover:text-club-red dark:hover:bg-red-500/10 dark:hover:text-red-400",
+    stripe: "border-l-club-red",
+    stripeFaint: "border-l-club-red/20",
   },
   personal: {
     title: "Лични",
@@ -93,10 +95,14 @@ const LISTS = {
       "aria-pressed:bg-club-navy aria-pressed:text-white dark:aria-pressed:bg-club-gold dark:aria-pressed:text-club-navy-dark",
     accentText: "text-club-navy dark:text-club-gold",
     hover: "hover:bg-blue-50/70 dark:hover:bg-blue-500/5",
-    arrowHover:
-      "hover:bg-blue-50 hover:text-club-navy dark:hover:bg-club-gold/10 dark:hover:text-club-gold",
+    stripe: "border-l-club-navy dark:border-l-club-gold",
+    stripeFaint: "border-l-club-navy/20 dark:border-l-club-gold/25",
   },
 } satisfies Record<ListName, Theme>;
+
+/** The move and ⋮ buttons on each todo: grey box, darker grey on hover (and while its menu is open). */
+const CONTROL_BUTTON =
+  "flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-800 active:scale-90 aria-expanded:bg-zinc-200 aria-expanded:text-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 dark:aria-expanded:bg-zinc-800";
 
 type Filter = "all" | "active" | "completed";
 
@@ -417,7 +423,7 @@ function Items({
   actions: ListActions;
 }) {
   return (
-    <ul className='space-y-1'>
+    <ul className='space-y-2 px-2'>
       {items.map((todo, i) => (
         <TodoItem
           key={todo.id}
@@ -495,7 +501,10 @@ function TodoItem({
 
   return (
     <li
-      className={`group flex items-center gap-3 rounded-xl py-2.5 pr-1.5 pl-3 transition-colors motion-safe:animate-todo-in ${theme.hover}`}
+      // Each todo is its own card: thin border and a left stripe that is faint while open and lights up in the list colour once done.
+      className={`group flex items-center gap-3 rounded-xl border border-l-4 border-zinc-200 bg-white py-2 pr-1.5 pl-3 shadow-xs transition-colors duration-300 motion-safe:animate-todo-in dark:border-zinc-800 dark:bg-zinc-950 ${
+        todo.completed ? theme.stripe : theme.stripeFaint
+      } ${theme.hover}`}
     >
       {/* The checkbox is a football: faint while open, solid and rolled in once done. */}
       <span className='relative flex size-7 shrink-0 items-center justify-center'>
@@ -530,60 +539,14 @@ function TodoItem({
       >
         {todo.title}
       </span>
-      {/* Desktop: edit/delete on hover, small stacked arrows. Phones get the larger controls below. */}
-      <div className='hidden shrink-0 gap-0.5 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 sm:flex'>
-        <button
-          type='button'
-          onClick={startEditing}
-          aria-label={`Редактирай: ${todo.title}`}
-          className='rounded-lg p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
-        >
-          <Pencil className='size-4' aria-hidden />
-        </button>
-        <button
-          type='button'
-          onClick={() => actions.remove(todo.id)}
-          aria-label={`Изтрий: ${todo.title}`}
-          className='rounded-lg p-1.5 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400'
-        >
-          <Trash className='size-4' aria-hidden />
-        </button>
-      </div>
-      <div
-        className='hidden shrink-0 flex-col border-l border-zinc-200 pl-1.5 sm:flex dark:border-zinc-800'
-        role='group'
-        aria-label={`Премести: ${todo.title}`}
-      >
+      {/* Move buttons (40px, finger-sized) side by side; edit/delete behind a ⋮ menu. Same on every screen. */}
+      <div className='flex shrink-0 items-center gap-1'>
         <button
           type='button'
           onClick={() => prevId && actions.swap(todo.id, prevId)}
           disabled={!prevId}
           aria-label={`Премести нагоре: ${todo.title}`}
-          title='Нагоре'
-          className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
-        >
-          <ArrowUp className='size-4' strokeWidth={2.75} aria-hidden />
-        </button>
-        <button
-          type='button'
-          onClick={() => nextId && actions.swap(todo.id, nextId)}
-          disabled={!nextId}
-          aria-label={`Премести надолу: ${todo.title}`}
-          title='Надолу'
-          className={`rounded p-0.5 text-zinc-400 transition disabled:pointer-events-none disabled:opacity-20 ${theme.arrowHover}`}
-        >
-          <ArrowDown className='size-4' strokeWidth={2.75} aria-hidden />
-        </button>
-      </div>
-
-      {/* Phones: finger-sized (40px) move buttons side by side, edit/delete behind a ⋮ menu. */}
-      <div className='flex shrink-0 items-center gap-1 sm:hidden'>
-        <button
-          type='button'
-          onClick={() => prevId && actions.swap(todo.id, prevId)}
-          disabled={!prevId}
-          aria-label={`Премести нагоре: ${todo.title}`}
-          className={`flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 transition active:scale-90 disabled:opacity-25 dark:bg-zinc-900 dark:text-zinc-400 ${theme.arrowHover}`}
+          className={`${CONTROL_BUTTON} disabled:opacity-25`}
         >
           <ArrowUp className='size-5' strokeWidth={2.5} aria-hidden />
         </button>
@@ -592,7 +555,7 @@ function TodoItem({
           onClick={() => nextId && actions.swap(todo.id, nextId)}
           disabled={!nextId}
           aria-label={`Премести надолу: ${todo.title}`}
-          className={`flex size-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 transition active:scale-90 disabled:opacity-25 dark:bg-zinc-900 dark:text-zinc-400 ${theme.arrowHover}`}
+          className={`${CONTROL_BUTTON} disabled:opacity-25`}
         >
           <ArrowDown className='size-5' strokeWidth={2.5} aria-hidden />
         </button>
@@ -603,7 +566,7 @@ function TodoItem({
             aria-label={`Още действия: ${todo.title}`}
             aria-expanded={menuOpen}
             aria-haspopup='menu'
-            className='flex size-10 items-center justify-center rounded-xl text-zinc-400 transition active:scale-90 active:bg-zinc-100 dark:active:bg-zinc-900'
+            className={CONTROL_BUTTON}
           >
             <MoreVertical className='size-5' aria-hidden />
           </button>

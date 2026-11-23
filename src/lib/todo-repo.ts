@@ -43,13 +43,13 @@ export async function getList(userId: string, list: ListName): Promise<Todo[]> {
   return rows.map(toTodo);
 }
 
-/** New todos go to the bottom of their list. */
+/** New todos go to the top of their list (positions may go below 1; a swap renumbers 1..n). */
 export async function insertTodo(userId: string, list: ListName, id: string, title: string) {
   const sql = await db();
   await sql`
     insert into todos (id, user_id, list, title, position)
     values (${id}, ${userId}, ${list}, ${title},
-            coalesce((select max(position) from todos where user_id = ${userId} and list = ${list}), 0) + 1)
+            coalesce((select min(position) from todos where user_id = ${userId} and list = ${list}), 1) - 1)
     on conflict (id) do nothing
   `;
 }

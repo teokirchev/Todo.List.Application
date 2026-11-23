@@ -54,7 +54,8 @@ export function newId(): string {
 
 /** Pure updates, used for optimistic UI before the server answers. */
 export const apply = {
-  add: (todos: Todo[], todo: Todo) => [...todos, todo],
+  /** New todos go first. */
+  add: (todos: Todo[], todo: Todo) => [todo, ...todos],
   setCompleted: (todos: Todo[], id: string, completed: boolean) =>
     todos.map((t) => (t.id === id ? { ...t, completed } : t)),
   rename: (todos: Todo[], id: string, title: string) =>
