@@ -7,7 +7,13 @@ import { Cannon, FootballIcon } from "@/components/club-emblem";
 // and fires a football across the row, which lands with a "ГОЛ!".
 
 /** `x`/`y` is where the muzzle sits on screen; `size` is the cannon's box in px. */
-type Shot = { id: number; x: number; y: number; distance: number; size: number };
+type Shot = {
+  id: number;
+  x: number;
+  y: number;
+  distance: number;
+  size: number;
+};
 type ShotRequest = Omit<Shot, "id">;
 
 const listeners = new Set<(shot: ShotRequest) => void>();
@@ -19,7 +25,7 @@ const CANNON_PHONE = 72;
 const MUZZLE_X = 0.82;
 const MUZZLE_Y = 0.41;
 /** Keeps the cannon this far from the left edge of the screen. */
-const EDGE_GAP = 4;
+const EDGE_GAP = -4;
 /** Length of the whole celebration; also drives the CSS animations through --shot-duration. */
 const DURATION_MS = 3000;
 

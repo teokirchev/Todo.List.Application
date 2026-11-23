@@ -507,7 +507,7 @@ function TodoItem({
       } ${theme.hover}`}
     >
       {/* The checkbox is a football: faint while open, solid and rolled in once done. */}
-      <span className='relative flex size-7 shrink-0 items-center justify-center'>
+      <span className='relative flex size-6 shrink-0 items-center justify-center'>
         <input
           type='checkbox'
           checked={todo.completed}
@@ -524,9 +524,9 @@ function TodoItem({
             actions.setCompleted(todo.id, !todo.completed);
           }}
           aria-label={`Завършена: ${todo.title}`}
-          className={`peer absolute inset-0 z-10 size-7 cursor-pointer appearance-none rounded-full outline-none ring-offset-2 focus-visible:ring-4 dark:ring-offset-zinc-950 ${theme.checkRing}`}
+          className={`peer absolute inset-0 z-10 size-6 cursor-pointer appearance-none rounded-full outline-none ring-offset-2 focus-visible:ring-4 dark:ring-offset-zinc-950 ${theme.checkRing}`}
         />
-        <FootballIcon className='pointer-events-none size-7 opacity-25 transition duration-200 peer-hover:opacity-55 peer-checked:opacity-100 peer-checked:drop-shadow-md motion-safe:peer-checked:animate-ball-in' />
+        <FootballIcon className='pointer-events-none size-6 opacity-25 transition duration-200 peer-hover:opacity-55 peer-checked:opacity-100 peer-checked:drop-shadow-md motion-safe:peer-checked:animate-ball-in' />
       </span>
       <span
         onDoubleClick={startEditing}
