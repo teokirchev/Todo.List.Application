@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { fireCannon } from "@/components/cannon-shot";
 import { celebrateVictory } from "@/components/victory";
+import { MultilineInput } from "@/components/multiline-input";
 import { Cannon, FootballIcon } from "@/components/club-emblem";
 import type { ListName, Todo } from "@/lib/todos";
 
@@ -146,11 +147,15 @@ export function TodoList({
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function submitDraft() {
     if (!draft.trim()) return;
     actions.add(draft);
     setDraft("");
+  }
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    submitDraft();
   }
 
   const loaded = todos !== null;
@@ -243,10 +248,10 @@ export function TodoList({
 
       <form
         onSubmit={handleSubmit}
-        className='flex items-center gap-2 px-4 pt-4'
+        className='flex items-start gap-2 px-4 pt-4'
       >
         <div
-          className={`flex min-w-0 flex-1 items-center gap-1 rounded-2xl border border-zinc-200 bg-white pl-1 ring-4 ring-transparent transition dark:border-zinc-800 dark:bg-zinc-900 ${theme.focus}`}
+          className={`flex min-w-0 flex-1 items-start gap-1 rounded-2xl border border-zinc-200 bg-white pl-1 ring-4 ring-transparent transition dark:border-zinc-800 dark:bg-zinc-900 ${theme.focus}`}
         >
           <button
             type='button'
@@ -266,22 +271,23 @@ export function TodoList({
                 ? "Маркирай всички като завършени"
                 : "Маркирай всички като активни"
             }
-            className='flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-0 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+            className='mt-1.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-0 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
           >
             <ChevronsDown className='size-5' aria-hidden />
           </button>
           <label htmlFor={inputId} className='sr-only'>
             Нова задача: {theme.title}
           </label>
-          <input
+          <MultilineInput
             id={inputId}
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={setDraft}
+            onSubmit={submitDraft}
+            onCancel={() => setDraft("")}
             placeholder='Добави нова задача…'
-            autoComplete='off'
             autoFocus={autoFocus}
             disabled={!loaded}
-            className='min-w-0 flex-1 bg-transparent py-3 pr-3 disabled:cursor-wait text-base outline-none placeholder:text-zinc-400'
+            className='py-3 pr-3 text-base'
           />
         </div>
         <button
@@ -483,18 +489,20 @@ function TodoItem({
         <label htmlFor={`edit-${todo.id}`} className='sr-only'>
           Редактирай задачата
         </label>
-        <input
-          id={`edit-${todo.id}`}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={() => finish(true)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") finish(true);
-            if (e.key === "Escape") finish(false);
-          }}
-          autoFocus
-          className={`w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 outline-none ring-4 ring-transparent dark:border-zinc-800 dark:bg-zinc-900 ${theme.focus}`}
-        />
+        <div
+          className={`rounded-xl border border-zinc-200 bg-white px-3 ring-4 ring-transparent dark:border-zinc-800 dark:bg-zinc-900 ${theme.focus}`}
+        >
+          <MultilineInput
+            id={`edit-${todo.id}`}
+            value={text}
+            onChange={setText}
+            onSubmit={() => finish(true)}
+            onCancel={() => finish(false)}
+            onBlur={() => finish(true)}
+            autoFocus
+            className='w-full py-2'
+          />
+        </div>
       </li>
     );
   }
@@ -531,7 +539,7 @@ function TodoItem({
       <span
         onDoubleClick={startEditing}
         title='Двоен клик за редакция'
-        className={`min-w-0 flex-1 wrap-break-word transition-colors ${
+        className={`min-w-0 flex-1 font-medium whitespace-pre-wrap wrap-break-word transition-colors ${
           todo.completed
             ? "text-zinc-400 line-through decoration-zinc-300 dark:text-zinc-500 dark:decoration-zinc-600"
             : ""
