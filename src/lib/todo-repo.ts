@@ -10,6 +10,7 @@ type Row = {
   title: string;
   completed: boolean;
   created_at: string | Date;
+  completed_at: string | Date | null;
 };
 
 function toTodo(row: Row): Todo {
@@ -18,13 +19,14 @@ function toTodo(row: Row): Todo {
     title: row.title,
     completed: row.completed,
     createdAt: new Date(row.created_at).getTime(),
+    completedAt: row.completed_at ? new Date(row.completed_at).getTime() : null,
   };
 }
 
 export async function getTodoLists(userId: string): Promise<TodoLists> {
   const sql = await db();
   const rows = (await sql`
-    select id, list, title, completed, created_at from todos
+    select id, list, title, completed, created_at, completed_at from todos
     where user_id = ${userId}
     order by position nulls last, created_at, id
   `) as Row[];
@@ -36,7 +38,7 @@ export async function getTodoLists(userId: string): Promise<TodoLists> {
 export async function getList(userId: string, list: ListName): Promise<Todo[]> {
   const sql = await db();
   const rows = (await sql`
-    select id, list, title, completed, created_at from todos
+    select id, list, title, completed, created_at, completed_at from todos
     where user_id = ${userId} and list = ${list}
     order by position nulls last, created_at, id
   `) as Row[];
@@ -82,8 +84,11 @@ export async function swapPositions(userId: string, list: ListName, a: string, b
 
 export async function updateCompleted(userId: string, list: ListName, id: string, completed: boolean) {
   const sql = await db();
+  // completed_at is stamped when a todo is ticked off and cleared when it is reopened.
   await sql`
-    update todos set completed = ${completed}
+    update todos set
+      completed = ${completed}::boolean,
+      completed_at = case when not ${completed}::boolean then null when completed then completed_at else now() end
     where id = ${id} and user_id = ${userId} and list = ${list}
   `;
 }
@@ -103,7 +108,13 @@ export async function deleteTodo(userId: string, list: ListName, id: string) {
 
 export async function updateAllCompleted(userId: string, list: ListName, completed: boolean) {
   const sql = await db();
-  await sql`update todos set completed = ${completed} where user_id = ${userId} and list = ${list}`;
+  // Todos that were already done keep their original completed_at.
+  await sql`
+    update todos set
+      completed = ${completed}::boolean,
+      completed_at = case when not ${completed}::boolean then null when completed then completed_at else now() end
+    where user_id = ${userId} and list = ${list}
+  `;
 }
 
 export async function deleteCompleted(userId: string, list: ListName) {

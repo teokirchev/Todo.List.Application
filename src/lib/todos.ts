@@ -8,6 +8,8 @@ export type Todo = {
   title: string;
   completed: boolean;
   createdAt: number;
+  /** When it was ticked off (ms); null while open, or for todos completed before this was recorded. */
+  completedAt: number | null;
 };
 
 export type TodoLists = Record<ListName, Todo[]>;
@@ -31,6 +33,7 @@ export function normalizeTitle(value: unknown): string | null {
   return title && title.length <= MAX_TITLE_LENGTH ? title : null;
 }
 
+/** Checks the fields every stored todo has (old browser-saved todos have no completedAt). */
 export function isTodo(value: unknown): value is Todo {
   if (typeof value !== "object" || value === null) return false;
   const t = value as Record<string, unknown>;
@@ -52,16 +55,22 @@ export function newId(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+/** Mirrors the server: completing stamps the time (unless already done), reopening clears it. */
+function withCompleted(todo: Todo, completed: boolean): Todo {
+  if (!completed) return { ...todo, completed, completedAt: null };
+  return { ...todo, completed, completedAt: todo.completed ? todo.completedAt : Date.now() };
+}
+
 /** Pure updates, used for optimistic UI before the server answers. */
 export const apply = {
   /** New todos go first. */
   add: (todos: Todo[], todo: Todo) => [todo, ...todos],
   setCompleted: (todos: Todo[], id: string, completed: boolean) =>
-    todos.map((t) => (t.id === id ? { ...t, completed } : t)),
+    todos.map((t) => (t.id === id ? withCompleted(t, completed) : t)),
   rename: (todos: Todo[], id: string, title: string) =>
     todos.map((t) => (t.id === id ? { ...t, title } : t)),
   remove: (todos: Todo[], id: string) => todos.filter((t) => t.id !== id),
-  setAll: (todos: Todo[], completed: boolean) => todos.map((t) => ({ ...t, completed })),
+  setAll: (todos: Todo[], completed: boolean) => todos.map((t) => withCompleted(t, completed)),
   clearCompleted: (todos: Todo[]) => todos.filter((t) => !t.completed),
   /** Exchanges the places of two todos (used to move one up or down past its neighbour). */
   swap: (todos: Todo[], a: string, b: string) => {

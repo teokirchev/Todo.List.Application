@@ -2,19 +2,24 @@
 
 import Image from "next/image";
 import {
+  useEffect,
   useId,
   useRef,
   useState,
   type ComponentType,
   type FormEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowDown,
   ArrowUp,
   ChevronsDown,
   Eraser,
+  CalendarPlus,
   Goal,
+  Info,
   MoreVertical,
+  X,
   Pencil,
   Plus,
   Shirt,
@@ -100,6 +105,13 @@ const LISTS = {
     stripeFaint: "border-l-club-navy/20 dark:border-l-club-gold/25",
   },
 } satisfies Record<ListName, Theme>;
+
+/** Fixed-position placement of a todo's ⋮ menu (px from the viewport edges). */
+type MenuPosition = { right: number; top?: number; bottom?: number };
+/** Height of the ⋮ menu (three 44px items plus padding), to decide whether it fits below the button. */
+const MENU_HEIGHT = 140;
+
+const DATE_TIME = new Intl.DateTimeFormat("bg-BG", { dateStyle: "long", timeStyle: "short" });
 
 /** The move and ⋮ buttons on each todo: grey box, darker grey on hover (and while its menu is open). */
 const CONTROL_BUTTON =
@@ -465,7 +477,24 @@ function TodoItem({
   actions: ListActions;
 }) {
   const [editing, setEditing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  /** Screen position of the open ⋮ menu, or null when closed. */
+  const [menu, setMenu] = useState<MenuPosition | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // The menu is fixed on screen, so close it rather than let it drift when the page scrolls or resizes.
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    const onKey = (e: globalThis.KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menu]);
   const [text, setText] = useState(todo.title);
   // Guards against a blur fired while the input unmounts after Enter/Escape.
   const doneRef = useRef(false);
@@ -567,35 +596,62 @@ function TodoItem({
         >
           <ArrowDown className='size-5' strokeWidth={2.5} aria-hidden />
         </button>
-        <div className='relative'>
+        <div>
           <button
             type='button'
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={(e) => {
+              if (menu) {
+                setMenu(null);
+                return;
+              }
+              // Place the menu under the button, or above it when there is no room below.
+              const r = e.currentTarget.getBoundingClientRect();
+              const up = window.innerHeight - r.bottom < MENU_HEIGHT + 8;
+              setMenu({
+                right: window.innerWidth - r.right,
+                ...(up ? { bottom: window.innerHeight - r.top + 4 } : { top: r.bottom + 4 }),
+              });
+            }}
             aria-label={`Още действия: ${todo.title}`}
-            aria-expanded={menuOpen}
+            aria-expanded={menu !== null}
             aria-haspopup='menu'
             className={CONTROL_BUTTON}
           >
             <MoreVertical className='size-5' aria-hidden />
           </button>
-          {menuOpen && (
+          {/* Rendered into <body> with fixed position, so the list card's rounded overflow cannot clip it. */}
+          {menu &&
+            createPortal(
             <>
               {/* Tapping anywhere outside closes the menu. */}
               <button
                 type='button'
                 aria-label='Затвори менюто'
-                onClick={() => setMenuOpen(false)}
-                className='fixed inset-0 z-20 cursor-default'
+                onClick={() => setMenu(null)}
+                className='fixed inset-0 z-70 cursor-default'
               />
               <div
                 role='menu'
-                className='absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-xl bg-white py-1 shadow-xl ring-1 ring-black/10 dark:bg-zinc-900 dark:ring-white/10'
+                style={menu}
+                className='fixed z-71 w-44 overflow-hidden rounded-xl bg-white py-1 text-zinc-900 shadow-xl ring-1 ring-black/10 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-white/10'
               >
                 <button
                   type='button'
                   role='menuitem'
                   onClick={() => {
-                    setMenuOpen(false);
+                    setMenu(null);
+                    setShowDetails(true);
+                  }}
+                  className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm active:bg-zinc-100 dark:active:bg-zinc-800'
+                >
+                  <Info className='size-4 text-zinc-500' aria-hidden />
+                  Детайли
+                </button>
+                <button
+                  type='button'
+                  role='menuitem'
+                  onClick={() => {
+                    setMenu(null);
                     startEditing();
                   }}
                   className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm active:bg-zinc-100 dark:active:bg-zinc-800'
@@ -607,7 +663,7 @@ function TodoItem({
                   type='button'
                   role='menuitem'
                   onClick={() => {
-                    setMenuOpen(false);
+                    setMenu(null);
                     actions.remove(todo.id);
                   }}
                   className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm text-red-600 active:bg-red-50 dark:text-red-400 dark:active:bg-red-500/10'
@@ -616,10 +672,104 @@ function TodoItem({
                   Изтрий
                 </button>
               </div>
-            </>
-          )}
+            </>,
+              document.body,
+            )}
+          {showDetails && <TodoDetails todo={todo} theme={theme} onClose={() => setShowDetails(false)} />}
         </div>
       </div>
     </li>
+  );
+}
+
+/** Centered dialog with when a todo was created and completed. Closes on Esc, the button, or a click outside. */
+function TodoDetails({ todo, theme, onClose }: { todo: Todo; theme: Theme; onClose: () => void }) {
+  const titleId = useId();
+  const doneWithTime = todo.completed && todo.completedAt !== null;
+
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const completed = !todo.completed
+    ? "Още не е завършена"
+    : todo.completedAt
+      ? DATE_TIME.format(todo.completedAt)
+      : "Неизвестно (завършена преди да се пази времето)";
+
+  return createPortal(
+    <div
+      className='fixed inset-0 z-70 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm'
+      onClick={onClose}
+    >
+      <div
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby={titleId}
+        onClick={(e) => e.stopPropagation()}
+        // Same look as the list cards: white rim, header band in the list colour with kit stripes.
+        className='w-full max-w-sm overflow-hidden rounded-3xl border-4 border-white bg-white text-zinc-900 shadow-2xl shadow-black/40 motion-safe:animate-todo-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100'
+      >
+        <div className={`relative flex items-center gap-3 overflow-hidden bg-linear-to-br px-5 py-4 text-white ${theme.header}`}>
+          <div
+            aria-hidden
+            className='pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.06)_0_14px,transparent_14px_28px)]'
+          />
+          <Cannon className='relative w-10 shrink-0 text-club-gold' />
+          <h3 id={titleId} className='relative font-display text-2xl font-semibold tracking-wide uppercase'>
+            Детайли
+          </h3>
+          <button
+            type='button'
+            onClick={onClose}
+            aria-label='Затвори'
+            autoFocus
+            className='relative ml-auto rounded-xl bg-black/20 p-1.5 text-white ring-1 ring-white/20 transition hover:bg-black/30'
+          >
+            <X className='size-5' aria-hidden />
+          </button>
+        </div>
+
+        <div className='px-5 pt-4 pb-5'>
+          <p className='line-clamp-4 font-medium whitespace-pre-wrap wrap-break-word text-zinc-800 dark:text-zinc-200'>
+            {todo.title}
+          </p>
+
+          <dl className='mt-4 space-y-2.5'>
+            <div className='flex items-center gap-3 rounded-2xl bg-zinc-50 p-3 ring-1 ring-zinc-100 dark:bg-zinc-900 dark:ring-zinc-800'>
+              <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm dark:bg-zinc-950 ${theme.accentText}`}>
+                <CalendarPlus className='size-5' aria-hidden />
+              </span>
+              <div className='min-w-0'>
+                <dt className='font-display text-xs tracking-widest text-zinc-400 uppercase'>Създадена</dt>
+                <dd className='text-sm font-medium'>{DATE_TIME.format(todo.createdAt)}</dd>
+              </div>
+            </div>
+            <div
+              className={`flex items-center gap-3 rounded-2xl p-3 ring-1 ${
+                doneWithTime
+                  ? "bg-club-gold/10 ring-club-gold/30"
+                  : "bg-zinc-50 ring-zinc-100 dark:bg-zinc-900 dark:ring-zinc-800"
+              }`}
+            >
+              <span
+                className={`flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm ${
+                  doneWithTime ? "bg-club-gold text-white" : "bg-white text-zinc-300 dark:bg-zinc-950 dark:text-zinc-600"
+                }`}
+              >
+                <Trophy className='size-5' aria-hidden />
+              </span>
+              <div className='min-w-0'>
+                <dt className='font-display text-xs tracking-widest text-zinc-400 uppercase'>Завършена</dt>
+                <dd className={`text-sm font-medium ${doneWithTime ? "" : "text-zinc-500 dark:text-zinc-400"}`}>{completed}</dd>
+              </div>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }

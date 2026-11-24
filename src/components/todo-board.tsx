@@ -90,7 +90,7 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
       add(title) {
         const clean = normalizeTitle(title);
         if (!clean) return;
-        const todo: Todo = { id: newId(), title: clean, completed: false, createdAt: Date.now() };
+        const todo: Todo = { id: newId(), title: clean, completed: false, createdAt: Date.now(), completedAt: null };
         run(list, (t) => apply.add(t, todo), () => addTodo(list, todo.id, clean));
       },
       setCompleted(id, completed) {

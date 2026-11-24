@@ -46,6 +46,8 @@ function ensureSchema(sql: Sql) {
         where t.position is null
       )
       update todos set position = ranked.rn from ranked where todos.id = ranked.id`,
+      // When a todo was ticked off. Added later, so todos completed before that have no time (null).
+      sql`alter table todos add column if not exists completed_at timestamptz`,
     ])
     .then(() => undefined);
 }
