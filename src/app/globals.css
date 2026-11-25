@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Light/dark theme is chosen by the data-theme attribute on <html> (set before first paint by the
+ * script in src/app/layout.tsx, and by the toggle). `dark:` utilities follow that attribute,
+ * not the browser setting directly, so the user can override it.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -184,11 +192,10 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
 }
 
 body {

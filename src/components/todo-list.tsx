@@ -80,8 +80,9 @@ const LISTS = {
     filterActive: "aria-pressed:bg-club-red aria-pressed:text-white",
     accentText: "text-club-red dark:text-red-400",
     hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
-    stripe: "border-l-club-red",
-    stripeFaint: "border-l-club-red/20",
+    // The dark: versions are needed: the card's dark:border-zinc-800 would otherwise repaint the stripe.
+    stripe: "border-l-club-red dark:border-l-club-red",
+    stripeFaint: "border-l-club-red/20 dark:border-l-club-red/30",
   },
   personal: {
     title: "Лични",

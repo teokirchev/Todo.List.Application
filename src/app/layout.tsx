@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import { Cannon, CannonPattern } from "@/components/club-emblem";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const oswald = Oswald({
@@ -35,11 +37,18 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // suppressHydrationWarning: the inline script below sets data-theme before React hydrates.
     <html
       lang="bg"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${oswald.variable} h-full antialiased`}
     >
+      <head>
+        {/* Applies the saved light/dark choice before the first paint, so there is no flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="relative isolate flex min-h-full flex-col overflow-x-hidden">
+        <ThemeToggle className="absolute top-4 left-4 z-20 sm:top-6 sm:left-6" />
         {/* Red-and-white background: red top with a slanted edge, white below with faint cannons */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <CannonPattern className="absolute inset-0 size-full text-club-gold/20 dark:text-club-gold/15" />
