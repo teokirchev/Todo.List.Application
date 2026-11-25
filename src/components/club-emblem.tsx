@@ -45,13 +45,30 @@ export function Cannon({ className = "" }: { className?: string }) {
   );
 }
 
-/** Background that tiles the team symbol, in `currentColor`. */
+/** How many small symbols the background grid draws (enough to cover a tall page; the rest is clipped). */
+const PATTERN_CELLS = 480;
+
+/**
+ * Background of team symbols, in `currentColor`. Two styles, picked per team in src/lib/teams.ts:
+ * - tiles: the symbol repeated edge to edge (--team-pattern-tile), good for wide, low symbols;
+ * - grid: smaller symbols with space around them (--team-pattern-size), good for tall symbols.
+ */
 export function CannonPattern({ className = "" }: { className?: string }) {
   return (
-    <div
-      aria-hidden
-      className={`bg-current [mask-image:var(--team-symbol)] [mask-repeat:repeat] [mask-size:96px_96px] ${className}`}
-    />
+    <>
+      <div
+        aria-hidden
+        className={`team-pattern-tile bg-current [mask-image:var(--team-symbol)] [mask-repeat:repeat] [mask-size:var(--team-pattern-tile)_var(--team-pattern-tile)] ${className}`}
+      />
+      <div
+        aria-hidden
+        className={`team-pattern-grid grid grid-cols-[repeat(auto-fill,104px)] auto-rows-[104px] place-items-center overflow-hidden ${className}`}
+      >
+        {Array.from({ length: PATTERN_CELLS }, (_, i) => (
+          <Cannon key={i} className="w-(--team-pattern-size)" />
+        ))}
+      </div>
+    </>
   );
 }
 

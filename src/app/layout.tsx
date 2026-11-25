@@ -59,8 +59,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="absolute inset-x-0 top-0 h-120 bg-club-primary [clip-path:polygon(0_0,100%_0,100%_78%,0_100%)] sm:h-108">
             <div className="absolute inset-0 bg-linear-to-b from-club-primary to-club-primary-dark" />
             <div className="absolute inset-0 bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.06)_0_22px,transparent_22px_44px)]" />
-            <Cannon className="absolute -top-16 -right-20 w-md text-club-accent sm:right-[3%]" />
-            <Cannon className="absolute top-16 -left-24 w-80 -scale-x-100 text-club-accent sm:left-[1%]" />
+            {/* Two symbols on the band, in one of two sizes picked per team (sideSymbols in src/lib/teams.ts). */}
+            {/* "big": wide, low symbols such as Arsenal's cannon. */}
+            <Cannon className="team-side-big absolute -top-16 -right-20 w-md text-club-accent sm:right-[3%]" />
+            <Cannon className="team-side-big team-symbol-mirror absolute top-16 -left-24 w-80 -scale-x-100 text-club-accent sm:left-[1%]" />
+            {/* "compact": tall symbols (e.g. Liverpool's bird) stay inside the band and clear of the user menu. */}
+            <Cannon className="team-side-compact absolute top-16 -right-6 w-40 text-club-accent sm:right-[6%] sm:w-64" />
+            <Cannon className="team-side-compact team-symbol-mirror absolute top-24 -left-8 w-32 -scale-x-100 text-club-accent sm:top-28 sm:left-[4%] sm:w-60" />
           </div>
         </div>
 
