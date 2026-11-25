@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Generic background symbol: a football silhouette (used as a mask, so only its shape matters).
+       Kept small inside the square so it takes about as much room as Arsenal's cannon. -->
+  <defs>
+    <mask id="patches">
+      <rect width="100" height="100" fill="#fff"/>
+      <path d="M50 40.3 59.2 47 55.7 57.9H44.3L40.8 47z" fill="#000"/>
+      <path d="M50 40.3V31M59.2 47l8.8-2.9M55.7 57.9l5.5 7.6M44.3 57.9l-5.5 7.6M40.8 47 32 44.1" stroke="#000" stroke-width="2"/>
+    </mask>
+  </defs>
+  <circle cx="50" cy="50" r="22" fill="#000" mask="url(#patches)"/>
+</svg>

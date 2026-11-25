@@ -143,7 +143,7 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
       {error && (
         <div
           role="alert"
-          className="mb-4 flex w-full max-w-5xl items-start gap-3 rounded-2xl border-2 border-club-red bg-white px-4 py-3 text-sm text-club-red-dark shadow-lg dark:bg-zinc-950 dark:text-red-300"
+          className="mb-4 flex w-full max-w-5xl items-start gap-3 rounded-2xl border-2 border-red-500 bg-white px-4 py-3 text-sm text-red-800 shadow-lg dark:bg-zinc-950 dark:text-red-300"
         >
           <span className="flex-1">{error}</span>
           <button

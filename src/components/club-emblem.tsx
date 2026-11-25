@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useId } from "react";
 
 /** A plain black-and-white football. */
@@ -30,32 +29,38 @@ export function FootballIcon({ className }: { className?: string }) {
   );
 }
 
-// Both images are files supplied by the owner in public/.
+// Crest and symbol come from the active team through CSS variables (--team-crest, --team-symbol,
+// see src/lib/teams.ts), so they switch with <html data-team> without any JavaScript.
 
 /**
- * The cannon (public/cannon.svg), painted in `currentColor` through a CSS mask,
- * so `text-*` classes set its colour. The image is square with the cannon centred.
+ * The team symbol (Arsenal: the cannon), painted in `currentColor` through a CSS mask,
+ * so `text-*` classes set its colour. The image is square with the symbol centred.
  */
 export function Cannon({ className = "" }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={`inline-block aspect-square bg-current [mask-image:url(/cannon.svg)] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain] ${className}`}
+      className={`inline-block aspect-square bg-current [mask-image:var(--team-symbol)] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain] ${className}`}
     />
   );
 }
 
-/** Background that tiles small cannons, in `currentColor`. */
+/** Background that tiles the team symbol, in `currentColor`. */
 export function CannonPattern({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden
-      className={`bg-current [mask-image:url(/cannon.svg)] [mask-repeat:repeat] [mask-size:96px_96px] ${className}`}
+      className={`bg-current [mask-image:var(--team-symbol)] [mask-repeat:repeat] [mask-size:96px_96px] ${className}`}
     />
   );
 }
 
-/** The crest (public/crest.svg). */
-export function ClubCrest({ className }: { className?: string }) {
-  return <Image src="/crest.svg" alt="" width={323} height={380} loading="eager" className={className} />;
+/** The team crest. Give it a height (e.g. h-28); the width follows the shield's proportions. */
+export function ClubCrest({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`inline-block aspect-[323/380] bg-contain bg-center bg-no-repeat [background-image:var(--team-crest)] ${className}`}
+    />
+  );
 }

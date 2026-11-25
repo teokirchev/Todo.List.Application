@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import { Cannon, CannonPattern } from "@/components/club-emblem";
+import { TeamText } from "@/components/team-text";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TEAM_INIT_SCRIPT, teamCss } from "@/lib/teams";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -21,8 +23,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Задачи · The Gunners",
-  description: "Работни и лични задачи в червено и бяло.",
+  title: "Задачи",
+  description: "Работни и лични задачи в цветовете на любимия ти отбор.",
   appleWebApp: {
     capable: true,
     title: "Задачи",
@@ -44,30 +46,38 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${oswald.variable} h-full antialiased`}
     >
       <head>
-        {/* Applies the saved light/dark choice before the first paint, so there is no flash. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Colours, crest, symbol and texts of every team; the active one follows <html data-team>. */}
+        <style dangerouslySetInnerHTML={{ __html: teamCss() }} />
+        {/* Applies the saved light/dark choice and team before the first paint, so there is no flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + ";" + TEAM_INIT_SCRIPT }} />
       </head>
       <body className="relative isolate flex min-h-full flex-col overflow-x-hidden">
         <ThemeToggle className="absolute top-4 left-4 z-20 sm:top-6 sm:left-6" />
-        {/* Red-and-white background: red top with a slanted edge, white below with faint cannons */}
+        {/* Team-coloured top with a slanted edge, white below with the team symbol faintly tiled */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <CannonPattern className="absolute inset-0 size-full text-club-gold/20 dark:text-club-gold/15" />
-          <div className="absolute inset-x-0 top-0 h-120 bg-club-red [clip-path:polygon(0_0,100%_0,100%_78%,0_100%)] sm:h-108">
-            <div className="absolute inset-0 bg-linear-to-b from-club-red to-club-red-dark" />
+          <CannonPattern className="absolute inset-0 size-full text-club-accent/20 dark:text-club-accent/15" />
+          <div className="absolute inset-x-0 top-0 h-120 bg-club-primary [clip-path:polygon(0_0,100%_0,100%_78%,0_100%)] sm:h-108">
+            <div className="absolute inset-0 bg-linear-to-b from-club-primary to-club-primary-dark" />
             <div className="absolute inset-0 bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.06)_0_22px,transparent_22px_44px)]" />
-            <Cannon className="absolute -top-16 -right-20 w-md text-club-gold sm:right-[3%]" />
-            <Cannon className="absolute top-16 -left-24 w-80 -scale-x-100 text-club-gold sm:left-[1%]" />
+            <Cannon className="absolute -top-16 -right-20 w-md text-club-accent sm:right-[3%]" />
+            <Cannon className="absolute top-16 -left-24 w-80 -scale-x-100 text-club-accent sm:left-[1%]" />
           </div>
         </div>
 
         {children}
 
-        <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 pt-4 pb-8 font-display text-sm tracking-[0.2em] text-club-red uppercase dark:text-red-400">
-          <span>North London is Red</span>
-          <span aria-hidden className="text-club-gold">★</span>
-          <span>COYG</span>
-          <span aria-hidden className="text-club-gold">★</span>
-          <span>Est. 1886</span>
+        <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 pt-4 pb-8 font-display text-sm tracking-[0.2em] text-club-primary uppercase dark:text-club-accent">
+          <span>
+            <TeamText field="footer" />
+          </span>
+          <span aria-hidden className="text-club-accent">★</span>
+          <span>
+            <TeamText field="chant" />
+          </span>
+          <span aria-hidden className="text-club-accent">★</span>
+          <span>
+            Est. <TeamText field="founded" />
+          </span>
         </footer>
       </body>
     </html>

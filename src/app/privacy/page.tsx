@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-16">
       <article className="w-full max-w-2xl overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl shadow-black/25 dark:border-zinc-800 dark:bg-zinc-950">
-        <header className="flex items-center gap-4 bg-linear-to-br from-club-red to-club-red-dark px-6 py-6 text-white">
+        <header className="flex items-center gap-4 bg-linear-to-br from-club-primary to-club-primary-dark px-6 py-6 text-white">
           <ClubCrest className="h-16 w-auto shrink-0" />
           <div>
             <h1 className="font-display text-3xl font-bold tracking-wide uppercase">Поверителност</h1>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             {contactEmail ? (
               <>
                 пиши на{" "}
-                <a href={`mailto:${contactEmail}`} className="font-medium text-club-red hover:underline dark:text-red-400">
+                <a href={`mailto:${contactEmail}`} className="font-medium text-club-primary hover:underline dark:text-club-accent">
                   {contactEmail}
                 </a>
                 .
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
           </Section>
 
           <p className="pt-2">
-            <Link href="/" className="font-medium text-club-red hover:underline dark:text-red-400">
+            <Link href="/" className="font-medium text-club-primary hover:underline dark:text-club-accent">
               ← Към задачите
             </Link>
           </p>

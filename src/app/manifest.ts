@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 /** Lets phones and desktop browsers install the site as an app ("Add to Home Screen"). */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Задачи · The Gunners",
+    name: "Задачи",
     short_name: "Задачи",
-    description: "Работни и лични задачи в червено и бяло.",
+    description: "Работни и лични задачи в цветовете на любимия ти отбор.",
     lang: "bg",
     start_url: "/",
     scope: "/",

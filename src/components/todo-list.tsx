@@ -8,6 +8,7 @@ import {
   useState,
   type ComponentType,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -28,6 +29,7 @@ import {
 } from "lucide-react";
 import { fireCannon } from "@/components/cannon-shot";
 import { celebrateVictory } from "@/components/victory";
+import { TeamText } from "@/components/team-text";
 import { MultilineInput } from "@/components/multiline-input";
 import { Cannon, FootballIcon } from "@/components/club-emblem";
 import type { ListName, Todo } from "@/lib/todos";
@@ -46,7 +48,7 @@ export type ListActions = {
 
 type Theme = {
   title: string;
-  subtitle: string;
+  subtitle: ReactNode;
   icon: ComponentType<{ className?: string }>;
   image: string;
   /** Tailwind classes must be complete literals so the compiler can see them. */
@@ -67,43 +69,43 @@ type Theme = {
 const LISTS = {
   work: {
     title: "Работни",
-    subtitle: "Emirates: проекти и срокове",
+    subtitle: <><TeamText field="stadium" />: проекти и срокове</>,
     icon: Cannon,
     image: "/illustrations/tactics.svg",
-    header: "from-club-red to-club-red-dark",
-    badge: "bg-white text-club-gold",
+    header: "from-club-primary to-club-primary-dark",
+    badge: "bg-white text-club-accent",
     bar: "bg-white",
-    button: "bg-club-red shadow-club-red/30 hover:bg-club-red-dark",
+    button: "bg-club-primary shadow-club-primary/30 hover:bg-club-primary-dark",
     focus:
-      "focus-within:border-club-red focus-within:ring-club-red/15 dark:focus-within:border-club-red",
-    checkRing: "focus-visible:ring-club-red/40",
-    filterActive: "aria-pressed:bg-club-red aria-pressed:text-white",
-    accentText: "text-club-red dark:text-red-400",
-    hover: "hover:bg-red-50/70 dark:hover:bg-red-500/5",
+      "focus-within:border-club-primary focus-within:ring-club-primary/15 dark:focus-within:border-club-primary",
+    checkRing: "focus-visible:ring-club-primary/40",
+    filterActive: "aria-pressed:bg-club-primary aria-pressed:text-white",
+    accentText: "text-club-primary dark:text-club-accent",
+    hover: "hover:bg-club-primary/5 dark:hover:bg-club-primary/10",
     // The dark: versions are needed: the card's dark:border-zinc-800 would otherwise repaint the stripe.
-    stripe: "border-l-club-red dark:border-l-club-red",
-    stripeFaint: "border-l-club-red/20 dark:border-l-club-red/30",
+    stripe: "border-l-club-primary dark:border-l-club-primary",
+    stripeFaint: "border-l-club-primary/20 dark:border-l-club-primary/30",
   },
   personal: {
     title: "Лични",
-    subtitle: "Извън Emirates: дом и семейство",
+    subtitle: <>Извън <TeamText field="stadium" />: дом и семейство</>,
     icon: Shirt,
     image: "/illustrations/goal.svg",
-    header: "from-club-navy to-club-navy-dark",
-    badge: "bg-club-gold text-club-navy-dark",
-    bar: "bg-club-gold",
+    header: "from-club-secondary to-club-secondary-dark",
+    badge: "bg-club-accent text-club-secondary-dark",
+    bar: "bg-club-accent",
     button:
-      "bg-club-navy shadow-club-navy/30 hover:bg-club-navy-dark dark:bg-club-gold dark:text-club-navy-dark dark:shadow-club-gold/20 dark:hover:bg-[#b8933d]",
+      "bg-club-secondary shadow-club-secondary/30 hover:bg-club-secondary-dark dark:bg-club-accent dark:text-club-secondary-dark dark:shadow-club-accent/20 dark:hover:bg-club-accent/85",
     focus:
-      "focus-within:border-club-navy focus-within:ring-club-navy/15 dark:focus-within:border-club-gold dark:focus-within:ring-club-gold/15",
+      "focus-within:border-club-secondary focus-within:ring-club-secondary/15 dark:focus-within:border-club-accent dark:focus-within:ring-club-accent/15",
     checkRing:
-      "focus-visible:ring-club-navy/40 dark:focus-visible:ring-club-gold/40",
+      "focus-visible:ring-club-secondary/40 dark:focus-visible:ring-club-accent/40",
     filterActive:
-      "aria-pressed:bg-club-navy aria-pressed:text-white dark:aria-pressed:bg-club-gold dark:aria-pressed:text-club-navy-dark",
-    accentText: "text-club-navy dark:text-club-gold",
-    hover: "hover:bg-blue-50/70 dark:hover:bg-blue-500/5",
-    stripe: "border-l-club-navy dark:border-l-club-gold",
-    stripeFaint: "border-l-club-navy/20 dark:border-l-club-gold/25",
+      "aria-pressed:bg-club-secondary aria-pressed:text-white dark:aria-pressed:bg-club-accent dark:aria-pressed:text-club-secondary-dark",
+    accentText: "text-club-secondary dark:text-club-accent",
+    hover: "hover:bg-club-secondary/5 dark:hover:bg-club-secondary/15",
+    stripe: "border-l-club-secondary dark:border-l-club-accent",
+    stripeFaint: "border-l-club-secondary/20 dark:border-l-club-accent/25",
   },
 } satisfies Record<ListName, Theme>;
 
@@ -351,9 +353,9 @@ export function TodoList({
           </div>
         ) : allDone && filter !== "completed" ? (
           <>
-            <div className='mx-2 mb-2 flex items-center gap-2 rounded-xl bg-club-gold/15 px-3 py-2 font-display tracking-wide text-[#8a6d24] uppercase dark:text-club-gold'>
+            <div className='mx-2 mb-2 flex items-center gap-2 rounded-xl bg-club-accent/15 px-3 py-2 font-display tracking-wide text-club-primary-dark uppercase dark:text-club-accent'>
               <Trophy className='size-5' aria-hidden />
-              Победа! Всичко е свършено. COYG!
+              Победа! Всичко е свършено. <TeamText field="chant" />!
             </div>
             {filter === "all" && (
               <Items list={list} items={visible} activeCount={activeCount} theme={theme} actions={actions} />
@@ -718,7 +720,7 @@ function TodoDetails({ todo, theme, onClose }: { todo: Todo; theme: Theme; onClo
             aria-hidden
             className='pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.06)_0_14px,transparent_14px_28px)]'
           />
-          <Cannon className='relative w-10 shrink-0 text-club-gold' />
+          <Cannon className='relative w-10 shrink-0 text-club-accent' />
           <h3 id={titleId} className='relative font-display text-2xl font-semibold tracking-wide uppercase'>
             Детайли
           </h3>
@@ -751,13 +753,13 @@ function TodoDetails({ todo, theme, onClose }: { todo: Todo; theme: Theme; onClo
             <div
               className={`flex items-center gap-3 rounded-2xl p-3 ring-1 ${
                 doneWithTime
-                  ? "bg-club-gold/10 ring-club-gold/30"
+                  ? "bg-club-accent/10 ring-club-accent/30"
                   : "bg-zinc-50 ring-zinc-100 dark:bg-zinc-900 dark:ring-zinc-800"
               }`}
             >
               <span
                 className={`flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm ${
-                  doneWithTime ? "bg-club-gold text-white" : "bg-white text-zinc-300 dark:bg-zinc-950 dark:text-zinc-600"
+                  doneWithTime ? "bg-club-accent text-white" : "bg-white text-zinc-300 dark:bg-zinc-950 dark:text-zinc-600"
                 }`}
               >
                 <Trophy className='size-5' aria-hidden />

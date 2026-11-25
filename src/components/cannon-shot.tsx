@@ -100,7 +100,7 @@ function CannonShot({ x, y, distance, size }: Shot) {
           height: size,
         }}
       >
-        <Cannon className='size-full text-club-gold' />
+        <Cannon className='size-full text-club-accent' />
       </div>
       <span className='cannon-shot-flash absolute -top-3 -left-1 size-6 rounded-full' />
       <span className='cannon-shot-smoke absolute -top-2.5 -left-1 size-5 rounded-full bg-zinc-300/80' />
@@ -109,7 +109,7 @@ function CannonShot({ x, y, distance, size }: Shot) {
       <div className='cannon-shot-ball absolute -top-3 -left-3 size-6'>
         <FootballIcon className='size-full drop-shadow' />
       </div>
-      <span className='cannon-shot-goal absolute -top-10 font-display text-2xl font-bold tracking-wide text-club-gold uppercase'>
+      <span className='cannon-shot-goal absolute -top-10 font-display text-2xl font-bold tracking-wide text-club-accent uppercase'>
         Гол!
       </span>
     </div>

@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getSession, requireUser } from "@/lib/auth";
+import { setTeamCookie } from "@/lib/team-cookie";
+import { isTeamId, type TeamId } from "@/lib/teams";
 import {
   deleteCompleted,
   deleteTodo,
@@ -9,6 +11,7 @@ import {
   getTodoLists,
   importTodos,
   insertTodo,
+  setUserTeam,
   swapPositions,
   updateAllCompleted,
   updateCompleted,
@@ -115,6 +118,15 @@ export async function importLocalTodos(input: unknown): Promise<TodoLists> {
   }
   await importTodos(user.id, items);
   return getTodoLists(user.id);
+}
+
+/** Saves the user's club and remembers it for this browser (applied before paint on every page). */
+export async function saveTeam(team: unknown): Promise<TeamId> {
+  const user = await requireUser();
+  if (!isTeamId(team)) throw new Error("Invalid team");
+  await setUserTeam(user.id, team);
+  await setTeamCookie(team);
+  return team;
 }
 
 export async function signOut() {

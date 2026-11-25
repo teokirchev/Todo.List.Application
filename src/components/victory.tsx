@@ -15,7 +15,8 @@ const LIST_LABEL: Record<ListName, string> = {
   personal: "Всички лични задачи са готови",
 };
 
-const CONFETTI_COLORS = ["#ef0107", "#ffffff", "#c9a54c", "#063672", "#f5d97a"];
+// Club colours of the active team, plus white and a light gold.
+const CONFETTI_COLORS = ["var(--team-primary)", "#ffffff", "var(--team-accent)", "var(--team-secondary)", "#f5d97a"];
 
 type Piece = {
   left: number;
@@ -138,7 +139,7 @@ export function VictoryLayer() {
           className='victory-rays pointer-events-none absolute top-[38%] left-1/2 size-[34rem] max-w-[160vw]'
         />
         <TrophyArt className='victory-trophy relative w-44 drop-shadow-[0_12px_30px_rgb(0_0_0/0.5)] sm:w-56' />
-        <p className='victory-title relative mt-4 font-display text-5xl font-bold tracking-wider text-club-gold uppercase sm:text-7xl'>
+        <p className='victory-title relative mt-4 font-display text-5xl font-bold tracking-wider text-club-accent uppercase sm:text-7xl'>
           Шампион!
         </p>
         <p className='victory-subtitle relative mt-2 text-lg font-medium text-white sm:text-xl'>

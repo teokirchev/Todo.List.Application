@@ -20,12 +20,12 @@
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-oswald);
 
-  /* Club palette: red and white with navy and gold accents. */
-  --color-club-red: #ef0107;
-  --color-club-red-dark: #b5000b;
-  --color-club-navy: #063672;
-  --color-club-navy-dark: #031f45;
-  --color-club-gold: #c9a54c;
+  /* Colour roles; the values come from the active team (src/lib/teams.ts, injected in the layout). */
+  --color-club-primary: var(--team-primary);
+  --color-club-primary-dark: var(--team-primary-dark);
+  --color-club-secondary: var(--team-secondary);
+  --color-club-secondary-dark: var(--team-secondary-dark);
+  --color-club-accent: var(--team-accent);
 
   --animate-todo-in: todo-in 220ms ease-out;
   --animate-ball-in: ball-in 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -94,7 +94,7 @@
   animation: cannon-shot-goal var(--shot-duration, 1.6s) ease-out forwards;
   opacity: 0;
   translate: -50% 0;
-  text-shadow: 0 2px 0 #b5000b, 0 4px 10px rgb(0 0 0 / 0.25);
+  text-shadow: 0 2px 0 var(--team-primary-dark), 0 4px 10px rgb(0 0 0 / 0.25);
 }
 @keyframes cannon-shot-goal {
   0%, 70% { opacity: 0; transform: scale(0.3); }
@@ -141,7 +141,7 @@
 }
 
 .victory-title {
-  text-shadow: 0 3px 0 #b5000b, 0 8px 24px rgb(0 0 0 / 0.5);
+  text-shadow: 0 3px 0 var(--team-primary-dark), 0 8px 24px rgb(0 0 0 / 0.5);
   animation: victory-text 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 550ms both;
 }
 .victory-subtitle {

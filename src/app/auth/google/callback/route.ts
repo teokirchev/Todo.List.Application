@@ -10,7 +10,8 @@ import {
   OAUTH_STATE_COOKIE,
   OAUTH_VERIFIER_COOKIE,
 } from "@/lib/auth";
-import { upsertUser } from "@/lib/todo-repo";
+import { setTeamCookie } from "@/lib/team-cookie";
+import { getUserTeam, upsertUser } from "@/lib/todo-repo";
 
 type GoogleClaims = {
   sub: string;
@@ -63,5 +64,9 @@ export async function GET(request: Request) {
   session.name = name;
   await session.save();
 
+  // Returning users get their club in this browser; first-timers pick one on the profile page.
+  const team = await getUserTeam(userId);
+  if (!team) redirect("/profile?welcome=1");
+  await setTeamCookie(team);
   redirect("/");
 }

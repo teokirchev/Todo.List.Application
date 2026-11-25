@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { isTeamId, type TeamId } from "@/lib/teams";
 import { newId, type ListName, type Todo, type TodoLists } from "@/lib/todos";
 
 // Every query is scoped by user_id, so a user can only ever touch their own rows.
@@ -137,6 +138,19 @@ export async function importTodos(userId: string, items: ImportItem[]) {
       `,
     ),
   );
+}
+
+/** The user's chosen team, or null if they have not picked one (or it is no longer offered). */
+export async function getUserTeam(userId: string): Promise<TeamId | null> {
+  const sql = await db();
+  const rows = (await sql`select team from users where id = ${userId}`) as { team: string | null }[];
+  const team = rows[0]?.team;
+  return isTeamId(team) ? team : null;
+}
+
+export async function setUserTeam(userId: string, team: TeamId) {
+  const sql = await db();
+  await sql`update users set team = ${team} where id = ${userId}`;
 }
 
 /** Creates the user on first sign-in, refreshes name and email afterwards. Returns the user id. */

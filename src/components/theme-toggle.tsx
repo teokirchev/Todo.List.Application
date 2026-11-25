@@ -68,7 +68,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           aria-label={label}
           title={label}
           onClick={() => chooseTheme(value)}
-          className="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-white/15 hover:text-white aria-checked:bg-white aria-checked:text-club-red aria-checked:shadow"
+          className="flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-white/15 hover:text-white aria-checked:bg-white aria-checked:text-club-primary aria-checked:shadow"
         >
           <Icon className="size-4" aria-hidden />
         </button>

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ClubCrest } from "@/components/club-emblem";
+import { TeamText } from "@/components/team-text";
 import { isInviteOnly } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -17,10 +18,10 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-10 sm:py-16">
       <div className="w-full max-w-sm overflow-hidden rounded-3xl border-4 border-white bg-white text-center shadow-2xl shadow-black/25 dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="flex flex-col items-center gap-3 bg-linear-to-br from-club-red to-club-red-dark px-6 pt-8 pb-6 text-white">
+        <div className="flex flex-col items-center gap-3 bg-linear-to-br from-club-primary to-club-primary-dark px-6 pt-8 pb-6 text-white">
           <ClubCrest className="h-24 w-auto drop-shadow-[0_8px_16px_rgb(0_0_0/0.35)]" />
           <h1 className="font-display text-4xl font-bold tracking-wide uppercase">Задачи</h1>
-          <p className="font-display text-sm tracking-[0.3em] text-white/80 uppercase">The Gunners</p>
+          <p className="font-display text-sm tracking-[0.3em] text-white/80 uppercase"><TeamText field="nickname" /></p>
         </div>
 
         <div className="flex flex-col gap-4 px-6 py-7">
@@ -58,7 +59,7 @@ async function LoginError({ searchParams }: { searchParams: PageProps<"/login">[
   const message = typeof error === "string" ? ERRORS[error] : undefined;
   if (!message) return null;
   return (
-    <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-club-red-dark dark:bg-red-500/10 dark:text-red-300">
+    <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">
       {message}
     </p>
   );
