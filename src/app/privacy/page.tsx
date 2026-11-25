@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClubCrest } from "@/components/club-emblem";
+import { isInviteOnly } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Поверителност · Задачи",
@@ -24,8 +25,9 @@ export default function PrivacyPage() {
 
         <div className="space-y-6 px-6 py-7 text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300">
           <Section title="Кой може да използва приложението">
-            „Задачи“ е лично приложение за малък кръг поканени хора. Влиза се само с Google акаунт, чийто имейл
-            собственикът на приложението е добавил в списъка с разрешени.
+            {isInviteOnly()
+              ? "„Задачи“ е лично приложение за малък кръг поканени хора. Влиза се само с Google акаунт, чийто имейл собственикът на приложението е добавил в списъка с разрешени."
+              : "„Задачи“ е лично приложение. Всеки, който има връзката, може да влезе с Google акаунт; всеки потребител вижда и променя само своите задачи."}
           </Section>
 
           <Section title="Какви данни се пазят">

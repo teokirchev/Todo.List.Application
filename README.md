@@ -1,10 +1,10 @@
 # Todo List
 
-Work and personal todo lists in a red-and-white football club theme. Built with Next.js, stored in Postgres (Neon), with Google sign-in limited to an allow list of emails.
+Work and personal todo lists in a red-and-white football club theme. Built with Next.js, stored in Postgres (Neon), with Google sign-in (open to every Google account, or invite-only via an allow list).
 
 ## How it works
 
-- **Sign-in:** Google OAuth (with PKCE) via [arctic](https://arcticjs.dev). Only emails in `ALLOWED_EMAILS` can sign in. Removing an email revokes access on the next request.
+- **Sign-in:** Google OAuth (with PKCE) via [arctic](https://arcticjs.dev). Anyone with a Google account can sign in while `ALLOWED_EMAILS` is empty or unset; once it lists emails, only those can sign in, and removing an email revokes access on the next request.
 - **Session:** an encrypted, HTTP-only cookie ([iron-session](https://github.com/vvo/iron-session)), valid for 30 days.
 - **Data:** Postgres via the [Neon serverless driver](https://neon.tech/docs/serverless/serverless-driver). Tables are created automatically on first use (`src/lib/db.ts`). Every query is scoped to the signed-in user.
 - **Mutations:** Server Actions (`src/app/actions.ts`) that re-check the session and validate input. The UI updates optimistically and then takes the server's answer.
@@ -36,7 +36,7 @@ Set these in Vercel (**Settings → Environment Variables**) and redeploy. See `
 | `GOOGLE_CLIENT_ID` | From step 2 |
 | `GOOGLE_CLIENT_SECRET` | From step 2 |
 | `SESSION_SECRET` | Random string, 32+ characters |
-| `ALLOWED_EMAILS` | `me@gmail.com, friend@gmail.com` |
+| `ALLOWED_EMAILS` | Optional. Empty = anyone; `me@gmail.com, friend@gmail.com` = invite-only |
 | `APP_URL` | Optional, e.g. `https://your-app.vercel.app` |
 | `CONTACT_EMAIL` | Optional, shown on `/privacy` for data requests |
 

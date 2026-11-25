@@ -37,13 +37,26 @@ export async function getSession() {
   return getIronSession<SessionData>(await cookies(), sessionOptions());
 }
 
-/** Emails from ALLOWED_EMAILS (comma, semicolon or whitespace separated), case-insensitive. */
-export function isAllowedEmail(email: string): boolean {
-  const allowed = (process.env.ALLOWED_EMAILS ?? "")
+/** Emails from ALLOWED_EMAILS (comma, semicolon or whitespace separated), lower-cased. */
+function allowedEmails(): string[] {
+  return (process.env.ALLOWED_EMAILS ?? "")
     .split(/[\s,;]+/)
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  return allowed.includes(email.trim().toLowerCase());
+}
+
+/**
+ * Invite-only when ALLOWED_EMAILS lists any emails; open to every Google account when it is empty
+ * or not set. Switching between the two needs no code change, only the setting (and a redeploy).
+ */
+export function isInviteOnly(): boolean {
+  return allowedEmails().length > 0;
+}
+
+/** Whether this email may sign in (always true when sign-in is open to everyone). */
+export function isAllowedEmail(email: string): boolean {
+  const allowed = allowedEmails();
+  return allowed.length === 0 || allowed.includes(email.trim().toLowerCase());
 }
 
 export function isAuthConfigured(): boolean {

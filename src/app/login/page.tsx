@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ClubCrest } from "@/components/club-emblem";
+import { isInviteOnly } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Вход · Задачи",
@@ -41,7 +42,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
           </a>
 
           <p className="text-xs text-zinc-400">
-            Достъп имат само поканени акаунти. ·{" "}
+            {isInviteOnly() ? "Достъп имат само поканени акаунти." : "Влизането е с Google акаунт."} ·{" "}
             <a href="/privacy" className="underline hover:text-zinc-600 dark:hover:text-zinc-200">
               Поверителност
             </a>
