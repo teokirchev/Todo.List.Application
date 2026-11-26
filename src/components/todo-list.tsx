@@ -73,25 +73,6 @@ const LISTS = {
     subtitle: <><TeamText field="stadium" />: проекти и срокове</>,
     icon: Cannon,
     image: "/illustrations/tactics.svg",
-    header: "from-club-primary to-club-primary-dark",
-    badge: "bg-white text-club-accent",
-    bar: "bg-white",
-    button: "bg-club-primary shadow-club-primary/30 hover:bg-club-primary-dark",
-    focus:
-      "focus-within:border-club-primary focus-within:ring-club-primary/15 dark:focus-within:border-club-primary",
-    checkRing: "focus-visible:ring-club-primary/40",
-    filterActive: "aria-pressed:bg-club-primary aria-pressed:text-white",
-    accentText: "text-club-primary dark:text-club-accent",
-    hover: "hover:bg-club-primary/5 dark:hover:bg-club-primary/10",
-    // The dark: versions are needed: the card's dark:border-zinc-800 would otherwise repaint the stripe.
-    stripe: "border-l-club-primary dark:border-l-club-primary",
-    stripeFaint: "border-l-club-primary/20 dark:border-l-club-primary/30",
-  },
-  personal: {
-    title: "Лични",
-    subtitle: <>Извън <TeamText field="stadium" />: дом и семейство</>,
-    icon: Shirt,
-    image: "/illustrations/goal.svg",
     header: "from-club-secondary to-club-secondary-dark",
     badge: "bg-club-accent text-club-secondary-dark",
     bar: "bg-club-accent",
@@ -105,8 +86,27 @@ const LISTS = {
       "aria-pressed:bg-club-secondary aria-pressed:text-white dark:aria-pressed:bg-club-accent dark:aria-pressed:text-club-secondary-dark",
     accentText: "text-club-secondary dark:text-club-accent",
     hover: "hover:bg-club-secondary/5 dark:hover:bg-club-secondary/15",
+    // The dark: versions are needed: the card's dark:border-zinc-800 would otherwise repaint the stripe.
     stripe: "border-l-club-secondary dark:border-l-club-accent",
     stripeFaint: "border-l-club-secondary/20 dark:border-l-club-accent/25",
+  },
+  personal: {
+    title: "Лични",
+    subtitle: <>Извън <TeamText field="stadium" />: дом и семейство</>,
+    icon: Shirt,
+    image: "/illustrations/goal.svg",
+    header: "from-club-primary to-club-primary-dark",
+    badge: "bg-white text-club-accent",
+    bar: "bg-white",
+    button: "bg-club-primary shadow-club-primary/30 hover:bg-club-primary-dark",
+    focus:
+      "focus-within:border-club-primary focus-within:ring-club-primary/15 dark:focus-within:border-club-primary",
+    checkRing: "focus-visible:ring-club-primary/40",
+    filterActive: "aria-pressed:bg-club-primary aria-pressed:text-white",
+    accentText: "text-club-primary dark:text-club-accent",
+    hover: "hover:bg-club-primary/5 dark:hover:bg-club-primary/10",
+    stripe: "border-l-club-primary dark:border-l-club-primary",
+    stripeFaint: "border-l-club-primary/20 dark:border-l-club-primary/30",
   },
 } satisfies Record<ListName, Theme>;
 

@@ -100,8 +100,8 @@ function UserBar({ user }: { user: User }) {
 function BoardPlaceholder() {
   return (
     <div className="grid w-full max-w-5xl items-start gap-6 md:grid-cols-2" aria-busy>
-      <TodoList list="work" todos={null} />
       <TodoList list="personal" todos={null} />
+      <TodoList list="work" todos={null} />
     </div>
   );
 }
