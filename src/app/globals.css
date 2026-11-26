@@ -103,6 +103,53 @@
   100% { opacity: 0; transform: translateY(-12px) scale(1) rotate(-3deg); }
 }
 
+/* Red card when a todo is deleted (src/components/red-card.tsx). */
+.red-card {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 35%, #b91c1c 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25), 0 8px 18px rgb(0 0 0 / 0.35);
+  transform-origin: 50% 100%;
+  animation: red-card var(--card-duration, 1.6s) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+/* Raised from below like a referee's arm, held up with a small shake, then gone. */
+@keyframes red-card {
+  0% { opacity: 0; transform: translateY(40px) rotate(-35deg) scale(0.6); }
+  18% { opacity: 1; transform: translateY(-6px) rotate(8deg) scale(1.1); }
+  26% { transform: translateY(0) rotate(-4deg) scale(1); }
+  34% { transform: rotate(3deg); }
+  42% { transform: rotate(-2deg); }
+  50% { transform: rotate(0deg); }
+  80% { opacity: 1; transform: rotate(0deg); }
+  100% { opacity: 0; transform: translateY(-14px) rotate(6deg) scale(0.9); }
+}
+.red-card-label {
+  animation: red-card-label var(--card-duration, 1.6s) ease-out forwards;
+  opacity: 0;
+  text-shadow: 0 2px 0 #fff, 0 4px 10px rgb(0 0 0 / 0.25);
+}
+@keyframes red-card-label {
+  0%, 18% { opacity: 0; transform: scale(0.4); }
+  28% { opacity: 1; transform: scale(1.2) rotate(-5deg); }
+  38% { transform: scale(1) rotate(-3deg); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px) rotate(-3deg); }
+}
+
+/* The todo leaves the pitch: a short shake, then it slides off and fades. */
+.todo-sent-off {
+  animation: todo-sent-off 900ms ease-in forwards;
+  pointer-events: none;
+}
+@keyframes todo-sent-off {
+  0% { transform: none; }
+  8% { transform: translateX(-5px); }
+  16% { transform: translateX(5px); }
+  24% { transform: translateX(-4px); }
+  32% { transform: translateX(3px); }
+  40% { transform: none; opacity: 1; }
+  100% { transform: translateX(110%) rotate(3deg); opacity: 0; }
+}
+
 /* Victory overlay (src/components/victory.tsx) when a whole list is done. */
 .victory-backdrop {
   animation: victory-fade-in 300ms ease-out both;

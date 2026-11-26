@@ -28,6 +28,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { fireCannon } from "@/components/cannon-shot";
+import { SEND_OFF_MS, showRedCard, wantsMotion } from "@/components/red-card";
 import { celebrateVictory } from "@/components/victory";
 import { TeamText } from "@/components/team-text";
 import { MultilineInput } from "@/components/multiline-input";
@@ -483,6 +484,9 @@ function TodoItem({
   /** Screen position of the open ⋮ menu, or null when closed. */
   const [menu, setMenu] = useState<MenuPosition | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  /** Deleted and playing the red-card animation; removed for real once it ends. */
+  const [sentOff, setSentOff] = useState(false);
+  const rowRef = useRef<HTMLLIElement>(null);
 
   // The menu is fixed on screen, so close it rather than let it drift when the page scrolls or resizes.
   useEffect(() => {
@@ -506,6 +510,19 @@ function TodoItem({
     doneRef.current = false;
     setText(todo.title);
     setEditing(true);
+  }
+
+  /** Delete with a red card: the card is raised over the row, the row slides off, then it is removed. */
+  function sendOff() {
+    const row = rowRef.current;
+    if (sentOff) return;
+    if (!row || !wantsMotion()) {
+      actions.remove(todo.id);
+      return;
+    }
+    setSentOff(true);
+    showRedCard(row.getBoundingClientRect());
+    setTimeout(() => actions.remove(todo.id), SEND_OFF_MS);
   }
 
   function finish(commit: boolean) {
@@ -541,10 +558,11 @@ function TodoItem({
 
   return (
     <li
+      ref={rowRef}
       // Each todo is its own card: thin border and a left stripe that is faint while open and lights up in the list colour once done.
       className={`group flex items-center gap-3 rounded-xl border border-l-4 border-zinc-200 bg-white py-2 pr-1.5 pl-3 shadow-xs transition-colors duration-300 motion-safe:animate-todo-in dark:border-zinc-800 dark:bg-zinc-950 ${
         todo.completed ? theme.stripe : theme.stripeFaint
-      } ${theme.hover}`}
+      } ${theme.hover} ${sentOff ? "todo-sent-off border-red-500! dark:border-red-500!" : ""}`}
     >
       {/* The checkbox is a football: faint while open, solid and rolled in once done. */}
       <span className='relative flex size-6 shrink-0 items-center justify-center'>
@@ -667,7 +685,7 @@ function TodoItem({
                   role='menuitem'
                   onClick={() => {
                     setMenu(null);
-                    actions.remove(todo.id);
+                    sendOff();
                   }}
                   className='flex h-11 w-full items-center gap-3 px-4 text-left text-sm text-red-600 active:bg-red-50 dark:text-red-400 dark:active:bg-red-500/10'
                 >
