@@ -10,7 +10,7 @@ import type { ListName } from "@/lib/todos";
 /** Leaves time for the row's cannon shot to play first. */
 const START_DELAY_MS = 900;
 /** How long the trophy stays up before it goes back down. */
-const SHOW_MS = 5200;
+const SHOW_MS = 3000;
 /** Length of the way down (matches .victory-leaving in globals.css). */
 const LEAVE_MS = 600;
 
@@ -55,8 +55,9 @@ function makeConfetti(count: number): Piece[] {
     drift: (Math.random() - 0.5) * 520,
     rise: 260 + Math.random() * 320,
     spin: (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720),
-    delay: 700 + Math.random() * 700,
-    duration: 2200 + Math.random() * 1400,
+    // All of it lands within SHOW_MS.
+    delay: 600 + Math.random() * 500,
+    duration: 1600 + Math.random() * 900,
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
     round: Math.random() < 0.3,
     size: 6 + Math.random() * 6,
