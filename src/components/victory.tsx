@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import type { ListName } from "@/lib/todos";
 
-// Full-screen celebration when every todo in a list is done: a golden trophy with light rays,
-// "ШАМПИОН!" and falling confetti in club colours.
+// Celebration when every todo in a list is done: from the bottom of the screen two arms in club
+// sleeves lift a golden trophy, "ШАМПИОН!" appears and confetti bursts up. It never blocks the
+// page (clicks go through) and goes back down by itself; Esc sends it away sooner.
 
 /** Leaves time for the row's cannon shot to play first. */
 const START_DELAY_MS = 900;
-const FADE_OUT_MS = 400;
+/** How long the trophy stays up before it goes back down. */
+const SHOW_MS = 5200;
+/** Length of the way down (matches .victory-leaving in globals.css). */
+const LEAVE_MS = 600;
 
 const LIST_LABEL: Record<ListName, string> = {
   work: "Всички работни задачи са готови",
@@ -19,8 +23,11 @@ const LIST_LABEL: Record<ListName, string> = {
 const CONFETTI_COLORS = ["var(--team-primary)", "#ffffff", "var(--team-accent)", "var(--team-secondary)", "#f5d97a"];
 
 type Piece = {
+  /** Start, in % of the screen width (around the trophy). */
   left: number;
   drift: number;
+  /** How high it flies, in px. */
+  rise: number;
   spin: number;
   delay: number;
   duration: number;
@@ -44,11 +51,12 @@ export function celebrateVictory(list: ListName) {
 
 function makeConfetti(count: number): Piece[] {
   return Array.from({ length: count }, () => ({
-    left: Math.random() * 100,
-    drift: (Math.random() - 0.5) * 160,
+    left: 30 + Math.random() * 40,
+    drift: (Math.random() - 0.5) * 520,
+    rise: 260 + Math.random() * 320,
     spin: (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720),
-    delay: Math.random() * 900,
-    duration: 2400 + Math.random() * 1600,
+    delay: 700 + Math.random() * 700,
+    duration: 2200 + Math.random() * 1400,
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
     round: Math.random() < 0.3,
     size: 6 + Math.random() * 6,
@@ -65,14 +73,12 @@ export function VictoryLayer() {
     const listener = (list: ListName) => {
       clearTimeout(startTimer);
       startTimer = setTimeout(() => {
-        const reducedMotion = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         setLeaving(false);
         setVictory({
           id: Date.now(),
           list,
-          pieces: reducedMotion ? [] : makeConfetti(70),
+          pieces: reducedMotion ? [] : makeConfetti(60),
           reducedMotion,
         });
       }, START_DELAY_MS);
@@ -84,19 +90,23 @@ export function VictoryLayer() {
     };
   }, []);
 
-  const close = useCallback(() => setLeaving(true), []);
+  const leave = useCallback(() => setLeaving(true), []);
 
-  // Stays up until dismissed with Esc (or a click on the overlay), then unmounts after the fade-out.
+  // Goes down by itself after a while, or straight away on Esc.
   useEffect(() => {
     if (!victory) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    const t = setTimeout(leave, SHOW_MS);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && leave();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [victory, close]);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [victory, leave]);
 
   useEffect(() => {
     if (!leaving) return;
-    const t = setTimeout(() => setVictory(null), FADE_OUT_MS);
+    const t = setTimeout(() => setVictory(null), LEAVE_MS);
     return () => clearTimeout(t);
   }, [leaving]);
 
@@ -107,8 +117,7 @@ export function VictoryLayer() {
       key={victory.id}
       role='status'
       aria-live='polite'
-      onClick={close}
-      className={`victory-backdrop fixed inset-0 z-[60] flex cursor-pointer items-center justify-center overflow-hidden bg-black/65 backdrop-blur-sm ${
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-60 h-svh overflow-hidden ${
         leaving ? "victory-leaving" : ""
       } ${victory.reducedMotion ? "victory-still" : ""}`}
     >
@@ -116,7 +125,7 @@ export function VictoryLayer() {
         <span
           key={i}
           aria-hidden
-          className='victory-confetti absolute top-0'
+          className='victory-confetti absolute bottom-24'
           style={
             {
               left: `${p.left}%`,
@@ -125,6 +134,7 @@ export function VictoryLayer() {
               borderRadius: p.round ? "9999px" : "2px",
               background: p.color,
               "--drift": `${p.drift}px`,
+              "--rise": `${p.rise}px`,
               "--spin": `${p.spin}deg`,
               animationDelay: `${p.delay}ms`,
               animationDuration: `${p.duration}ms`,
@@ -133,30 +143,26 @@ export function VictoryLayer() {
         />
       ))}
 
-      <div className='relative flex flex-col items-center px-6 text-center'>
-        <div
-          aria-hidden
-          className='victory-rays pointer-events-none absolute top-[38%] left-1/2 size-[34rem] max-w-[160vw]'
-        />
-        <TrophyArt className='victory-trophy relative w-44 drop-shadow-[0_12px_30px_rgb(0_0_0/0.5)] sm:w-56' />
-        <p className='victory-title relative mt-4 font-display text-5xl font-bold tracking-wider text-club-accent uppercase sm:text-7xl'>
+      <div className='victory-lift absolute bottom-0 left-1/2 flex w-72 flex-col items-center text-center sm:w-80'>
+        <p className='victory-title font-display text-4xl font-bold tracking-wider text-club-accent uppercase sm:text-5xl'>
           Шампион!
         </p>
-        <p className='victory-subtitle relative mt-2 text-lg font-medium text-white sm:text-xl'>
+        <p className='victory-subtitle mt-1 rounded-full bg-zinc-950/75 px-3 py-1 text-sm font-medium text-white sm:text-base'>
           {LIST_LABEL[victory.list]}
         </p>
-        <p className='victory-subtitle relative mt-6 text-xs tracking-widest text-white/50 uppercase'>
-          Клик или Esc за затваряне
-        </p>
+        <div className='relative mt-2 w-full'>
+          <div aria-hidden className='victory-rays absolute top-[22%] left-1/2 size-80' />
+          <TrophyLift className='victory-trophy relative w-full drop-shadow-[0_10px_24px_rgb(0_0_0/0.35)]' />
+        </div>
       </div>
     </div>
   );
 }
 
-/** An original, generic golden cup. */
-function TrophyArt({ className }: { className?: string }) {
+/** Two arms in club sleeves holding up an original, generic golden cup. */
+function TrophyLift({ className }: { className?: string }) {
   return (
-    <svg viewBox='0 0 120 140' aria-hidden className={className}>
+    <svg viewBox='0 0 200 290' overflow='visible' aria-hidden className={className}>
       <defs>
         <linearGradient id='victory-gold' x1='0' x2='1' y1='0' y2='0'>
           <stop offset='0' stopColor='#b08a35' />
@@ -169,46 +175,36 @@ function TrophyArt({ className }: { className?: string }) {
           <stop offset='1' stopColor='#7a5c1c' />
         </linearGradient>
       </defs>
-      {/* handles */}
-      <path
-        d='M31 28C9 28 7 62 37 67'
-        fill='none'
-        stroke='url(#victory-gold)'
-        strokeWidth='7'
-        strokeLinecap='round'
-      />
-      <path
-        d='M89 28c22 0 24 34-6 39'
-        fill='none'
-        stroke='url(#victory-gold)'
-        strokeWidth='7'
-        strokeLinecap='round'
-      />
-      {/* cup */}
-      <path
-        d='M28 18h64v22c0 24-14 40-32 42-18-2-32-18-32-42z'
-        fill='url(#victory-gold)'
-      />
-      <rect x='23' y='12' width='74' height='9' rx='4.5' fill='#f2d377' />
-      <path
-        d='M38 26c-2 20 2 36 10 46'
-        fill='none'
-        stroke='#fff'
-        strokeOpacity='.45'
-        strokeWidth='4'
-        strokeLinecap='round'
-      />
-      <path
-        d='m60 34 3.8 7.7 8.5 1.2-6.2 6 1.5 8.4L60 53.3l-7.6 4 1.5-8.4-6.2-6 8.5-1.2z'
-        fill='#fff8dc'
-        fillOpacity='.9'
-      />
-      {/* stem and base */}
-      <path d='M54 82h12l-2 17h-8z' fill='url(#victory-gold-dark)' />
-      <rect x='47' y='97' width='26' height='7' rx='3.5' fill='#d9b452' />
-      <path d='M38 104h44l5 22H33z' fill='url(#victory-gold-dark)' />
-      <rect x='45' y='110' width='30' height='9' rx='2' fill='#5c4413' />
-      <rect x='30' y='125' width='60' height='8' rx='3' fill='#6b5018' />
+
+      {/* arms: forearms, then sleeves in the team colour down to the edge of the screen */}
+      <g strokeLinecap='round' fill='none'>
+        <path d='M66 120 50 205' stroke='#d9a066' strokeWidth='20' />
+        <path d='M134 120l16 85' stroke='#d9a066' strokeWidth='20' />
+        <path d='M50 200 34 420' stroke='var(--team-primary)' strokeWidth='32' />
+        <path d='m150 200 16 220' stroke='var(--team-primary)' strokeWidth='32' />
+        <path d='M50 200 34 420' stroke='#fff' strokeOpacity='.18' strokeWidth='6' />
+        <path d='m150 200 16 220' stroke='#fff' strokeOpacity='.18' strokeWidth='6' />
+      </g>
+
+      {/* the cup */}
+      <g transform='translate(40 0)'>
+        <path d='M31 28C9 28 7 62 37 67' fill='none' stroke='url(#victory-gold)' strokeWidth='7' strokeLinecap='round' />
+        <path d='M89 28c22 0 24 34-6 39' fill='none' stroke='url(#victory-gold)' strokeWidth='7' strokeLinecap='round' />
+        <path d='M28 18h64v22c0 24-14 40-32 42-18-2-32-18-32-42z' fill='url(#victory-gold)' />
+        <rect x='23' y='12' width='74' height='9' rx='4.5' fill='#f2d377' />
+        <path d='M38 26c-2 20 2 36 10 46' fill='none' stroke='#fff' strokeOpacity='.45' strokeWidth='4' strokeLinecap='round' />
+        <path d='m60 34 3.8 7.7 8.5 1.2-6.2 6 1.5 8.4L60 53.3l-7.6 4 1.5-8.4-6.2-6 8.5-1.2z' fill='#fff8dc' fillOpacity='.9' />
+        <path d='M54 82h12l-2 17h-8z' fill='url(#victory-gold-dark)' />
+        <rect x='47' y='97' width='26' height='7' rx='3.5' fill='#d9b452' />
+        <path d='M38 104h44l5 22H33z' fill='url(#victory-gold-dark)' />
+        <rect x='45' y='110' width='30' height='9' rx='2' fill='#5c4413' />
+        <rect x='30' y='125' width='60' height='8' rx='3' fill='#6b5018' />
+      </g>
+
+      {/* hands gripping the base */}
+      <circle cx='68' cy='118' r='11' fill='#e0ac72' />
+      <circle cx='132' cy='118' r='11' fill='#e0ac72' />
+      <path d='M62 112h9M62 117h10M63 122h8M129 112h9M128 117h10M129 122h8' stroke='#b9824b' strokeWidth='1.6' strokeLinecap='round' />
     </svg>
   );
 }
