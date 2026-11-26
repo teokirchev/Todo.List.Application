@@ -159,8 +159,8 @@ export function TodoBoard({ initial }: { initial: TodoLists }) {
         </div>
       )}
       <div className="grid w-full max-w-5xl items-start gap-6 md:grid-cols-2">
-        <TodoList list="personal" todos={lists.personal} actions={actions.personal} />
-        <TodoList list="work" todos={lists.work} actions={actions.work} autoFocus />
+        <TodoList list="personal" todos={lists.personal} actions={actions.personal} autoFocus />
+        <TodoList list="work" todos={lists.work} actions={actions.work} />
       </div>
     </>
   );
