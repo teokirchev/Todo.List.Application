@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
+import { AppLoader, LOADER_SCRIPT } from "@/components/app-loader";
 import { Cannon, CannonPattern } from "@/components/club-emblem";
 import { TeamText } from "@/components/team-text";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -49,9 +50,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Colours, crest, symbol and texts of every team; the active one follows <html data-team>. */}
         <style dangerouslySetInnerHTML={{ __html: teamCss() }} />
         {/* Applies the saved light/dark choice and team before the first paint, so there is no flash. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + ";" + TEAM_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + ";" + TEAM_INIT_SCRIPT + ";" + LOADER_SCRIPT }} />
+        {/* Without JavaScript nothing would hide the loader. */}
+        <noscript>
+          <style>{".app-loader{display:none!important}"}</style>
+        </noscript>
       </head>
       <body className="relative isolate flex min-h-full flex-col overflow-x-hidden">
+        <AppLoader />
         <ThemeToggle className="absolute top-4 left-4 z-20 sm:top-6 sm:left-6" />
         {/* Team-coloured top with a slanted edge, white below with the team symbol faintly tiled */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
