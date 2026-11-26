@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import { AppLoader, LOADER_SCRIPT } from "@/components/app-loader";
 import { Cannon, CannonPattern } from "@/components/club-emblem";
 import { TeamText } from "@/components/team-text";
+import { NavigationLoader } from "@/components/show-loader";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TEAM_INIT_SCRIPT, teamCss } from "@/lib/teams";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="relative isolate flex min-h-full flex-col overflow-x-hidden">
         <AppLoader />
+        <NavigationLoader />
         <ThemeToggle className="absolute top-4 left-4 z-20 sm:top-6 sm:left-6" />
         {/* Team-coloured top with a slanted edge, white below with the team symbol faintly tiled */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">

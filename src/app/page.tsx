@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { ShowLoader } from "@/components/show-loader";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { LogOut, Settings } from "lucide-react";
@@ -100,6 +101,7 @@ function UserBar({ user }: { user: User }) {
 function BoardPlaceholder() {
   return (
     <div className="grid w-full max-w-5xl items-start gap-6 md:grid-cols-2" aria-busy>
+      <ShowLoader />
       <TodoList list="personal" todos={null} />
       <TodoList list="work" todos={null} />
     </div>

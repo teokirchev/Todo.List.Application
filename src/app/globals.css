@@ -103,14 +103,19 @@
   100% { opacity: 0; transform: translateY(-12px) scale(1) rotate(-3deg); }
 }
 
-/* Loading screen (src/components/app-loader.tsx); fades out once <html data-loaded> is set. */
+/* Loading screen (src/components/app-loader.tsx); fades out once <html data-loaded> is set,
+   and comes back while moving between pages (data-navigating) or while content is still loading (data-busy). */
 .app-loader {
   transition: opacity 400ms ease, visibility 400ms;
 }
-:root[data-loaded] .app-loader {
+:root[data-loaded]:not([data-busy]):not([data-navigating]) .app-loader {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+:root[data-loaded][data-navigating] .app-loader,
+:root[data-loaded][data-busy] .app-loader {
+  transition-duration: 150ms;
 }
 /* Keepy-uppies: up slowing down, down speeding up, spinning a little; the shadow shrinks as the ball rises. */
 .app-loader-ball {

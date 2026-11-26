@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { ShowLoader } from "@/components/show-loader";
 import { connection } from "next/server";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/app/actions";
@@ -30,7 +31,13 @@ export default function ProfilePage({ searchParams }: PageProps<"/profile">) {
           </p>
         </div>
 
-        <Suspense fallback={<div className="h-64 animate-pulse bg-zinc-50 dark:bg-zinc-900" />}>
+        <Suspense
+          fallback={
+            <div className="h-64 animate-pulse bg-zinc-50 dark:bg-zinc-900">
+              <ShowLoader />
+            </div>
+          }
+        >
           <ProfileBody searchParams={searchParams} />
         </Suspense>
       </div>
