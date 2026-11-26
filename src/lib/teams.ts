@@ -206,12 +206,11 @@ export const TEAM_ICONS = Object.fromEntries(TEAMS.map((t) => [t.id, crestHref(t
 
 /**
  * Runs inline in <head> before the first paint: applies the team from the cookie and points the
- * browser-tab icon at its crest, and the iPhone home-screen icon (apple-touch-icon) at its icon, so
- * "Add to Home Screen" picks up the chosen club. Next.js may insert icon <link> tags after this script (streamed
- * metadata), so new ones are caught as they appear. The team is read from <html data-team>, so a
+ * browser-tab icon at its crest (the installed app's icon is the same football for every club). Next.js may
+ * insert icon <link> tags after this script (streamed metadata), so new ones are caught as they appear. The team is read from <html data-team>, so a
  * later switch (applyTeam) is respected too.
  */
-export const TEAM_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${TEAM_COOKIE}=([^;]+)/);var t=m&&decodeURIComponent(m[1]);var icons=${JSON.stringify(TEAM_ICONS)};var root=document.documentElement;if(t in icons)root.setAttribute("data-team",t);var setIcon=function(){var h=icons[root.getAttribute("data-team")]||icons[${JSON.stringify(DEFAULT_TEAM)}];var ls=document.querySelectorAll('link[rel~="icon"]');for(var i=0;i<ls.length;i++){if(ls[i].getAttribute("href")!==h){ls[i].href=h;ls[i].removeAttribute("sizes");ls[i].removeAttribute("type")}}var a="/teams/"+(root.getAttribute("data-team")||${JSON.stringify(DEFAULT_TEAM)})+"/apple-icon.png";var as=document.querySelectorAll('link[rel="apple-touch-icon"]');for(var k=0;k<as.length;k++){if(as[k].getAttribute("href")!==a)as[k].href=a}};setIcon();new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++){var n=a[j];if(n.nodeName==="LINK"||(n.querySelector&&n.querySelector('link[rel~="icon"]'))){setIcon();return}}}}).observe(root,{childList:true,subtree:true})}catch(e){}})()`;
+export const TEAM_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${TEAM_COOKIE}=([^;]+)/);var t=m&&decodeURIComponent(m[1]);var icons=${JSON.stringify(TEAM_ICONS)};var root=document.documentElement;if(t in icons)root.setAttribute("data-team",t);var setIcon=function(){var h=icons[root.getAttribute("data-team")]||icons[${JSON.stringify(DEFAULT_TEAM)}];var ls=document.querySelectorAll('link[rel~="icon"]');for(var i=0;i<ls.length;i++){if(ls[i].getAttribute("href")!==h){ls[i].href=h;ls[i].removeAttribute("sizes");ls[i].removeAttribute("type")}}};setIcon();new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++){var n=a[j];if(n.nodeName==="LINK"||(n.querySelector&&n.querySelector('link[rel~="icon"]'))){setIcon();return}}}}).observe(root,{childList:true,subtree:true})}catch(e){}})()`;
 
 /** CSS for every team: colour variables, crest and symbol, and which team texts are visible. */
 export function teamCss(): string {

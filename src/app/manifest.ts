@@ -1,18 +1,11 @@
 import type { MetadataRoute } from "next";
-import { cookies } from "next/headers";
-import { DEFAULT_TEAM, getTeam, isTeamId, TEAM_COOKIE } from "@/lib/teams";
 
 /**
  * Lets phones and desktop browsers install the site as an app ("Add to Home Screen").
- * Icons and colour follow the club in the "team" cookie, so installing after picking a club gives
- * that club's crest. An already installed app keeps its icon until it is reinstalled (phones only
- * read it at install time; Android may refresh it on its own after a while).
+ * The app icon is the same football on grass for every club; the browser tab shows the club's crest
+ * (see TEAM_INIT_SCRIPT in src/lib/teams.ts). iPhones use src/app/apple-icon.png instead.
  */
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const saved = (await cookies()).get(TEAM_COOKIE)?.value;
-  const team = getTeam(isTeamId(saved) ? saved : DEFAULT_TEAM);
-  const dir = `/teams/${team.id}`;
-
+export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Задачи",
     short_name: "Задачи",
@@ -22,11 +15,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     scope: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: team.colors.primary,
+    theme_color: "#16803a",
     icons: [
-      { src: `${dir}/icon-192.png`, sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: `${dir}/icon-512.png`, sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: `${dir}/maskable-512.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/app-icon/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/app-icon/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      // The ball sits well inside the safe zone, so the same picture works when the phone crops it.
+      { src: "/app-icon/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }
