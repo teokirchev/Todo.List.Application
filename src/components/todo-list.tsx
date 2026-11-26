@@ -28,7 +28,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { fireCannon } from "@/components/cannon-shot";
-import { SEND_OFF_MS, showRedCard, wantsMotion } from "@/components/red-card";
+import { SEND_OFF_MS, showCard, wantsMotion } from "@/components/referee-card";
 import { celebrateVictory } from "@/components/victory";
 import { TeamText } from "@/components/team-text";
 import { MultilineInput } from "@/components/multiline-input";
@@ -484,7 +484,7 @@ function TodoItem({
   /** Screen position of the open ⋮ menu, or null when closed. */
   const [menu, setMenu] = useState<MenuPosition | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  /** Deleted and playing the red-card animation; removed for real once it ends. */
+  /** Deleted and playing the red card animation; removed for real once it ends. */
   const [sentOff, setSentOff] = useState(false);
   const rowRef = useRef<HTMLLIElement>(null);
 
@@ -521,7 +521,7 @@ function TodoItem({
       return;
     }
     setSentOff(true);
-    showRedCard(row.getBoundingClientRect());
+    showCard(row.getBoundingClientRect(), "red");
     setTimeout(() => actions.remove(todo.id), SEND_OFF_MS);
   }
 
@@ -578,6 +578,9 @@ function TodoItem({
                 ?.getBoundingClientRect();
               fireCannon(box, row ? row.right - box.left - 90 : 200);
               if (isLastOpen) celebrateVictory(list);
+            } else if (rowRef.current) {
+              // Put back to open: a yellow card as a warning.
+              showCard(rowRef.current.getBoundingClientRect(), "yellow");
             }
             actions.setCompleted(todo.id, !todo.completed);
           }}
