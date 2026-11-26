@@ -40,7 +40,7 @@ export function Cannon({ className = "" }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={`inline-block aspect-square bg-current [mask-image:var(--team-symbol)] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain] ${className}`}
+      className={`team-symbol inline-block aspect-square bg-current [mask-image:var(--team-symbol)] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain] ${className}`}
     />
   );
 }

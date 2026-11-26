@@ -3,12 +3,15 @@
 import { useEffect } from "react";
 import { TEAM_COOKIE, TEAM_ICONS, type TeamId } from "@/lib/teams";
 
-/** Points the browser-tab icon(s) at the team's crest. */
+/** Points the browser-tab icon(s) at the team's crest and the iPhone home-screen icon at its icon. */
 export function setTeamFavicon(team: TeamId) {
   document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((link) => {
     link.href = TEAM_ICONS[team];
     link.removeAttribute("sizes");
     link.removeAttribute("type");
+  });
+  document.querySelectorAll<HTMLLinkElement>('link[rel="apple-touch-icon"]').forEach((link) => {
+    link.href = `/teams/${team}/apple-icon.png`;
   });
 }
 

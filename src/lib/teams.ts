@@ -40,6 +40,11 @@ export type Team = {
   symbol?: string;
   /** The tick-off celebration shows the symbol firing (tuned to Arsenal's cannon; other symbols skip it). */
   cannonShot?: boolean;
+  /**
+   * Show the symbol in its own colours (e.g. a full crest) instead of as a silhouette in the accent
+   * colour. Multi-coloured artwork would otherwise collapse into a flat blob.
+   */
+  symbolInColor?: boolean;
   /** The background shows the symbol mirrored on the left; leave off for symbols with lettering. */
   mirrorSymbol?: boolean;
   /**
@@ -129,6 +134,8 @@ export const TEAMS: Team[] = [
     initials: "MCFC",
     colors: { primary: "#4a90cc", primaryDark: "#1c2c5b", secondary: "#1c2c5b", secondaryDark: "#0f1a3a", accent: "#ffc659" },
     crest: "/teams/mancity/crest.svg",
+    symbol: "/teams/mancity/symbol.png",
+    symbolInColor: true,
   },
   {
     id: "realmadrid",
@@ -142,6 +149,8 @@ export const TEAMS: Team[] = [
     initials: "RMCF",
     colors: { primary: "#00529f", primaryDark: "#003366", secondary: "#3d195b", secondaryDark: "#24103a", accent: "#febe10" },
     crest: "/teams/realmadrid/crest.svg",
+    symbol: "/teams/realmadrid/crest.svg",
+    symbolInColor: true,
   },
   {
     id: "barcelona",
@@ -155,6 +164,8 @@ export const TEAMS: Team[] = [
     initials: "FCB",
     colors: { primary: "#a50044", primaryDark: "#6e002d", secondary: "#004d98", secondaryDark: "#00305f", accent: "#edbb00" },
     crest: "/teams/barcelona/crest.svg",
+    symbol: "/teams/barcelona/crest.svg",
+    symbolInColor: true,
   },
 ];
 
@@ -195,11 +206,12 @@ export const TEAM_ICONS = Object.fromEntries(TEAMS.map((t) => [t.id, crestHref(t
 
 /**
  * Runs inline in <head> before the first paint: applies the team from the cookie and points the
- * browser-tab icon at its crest. Next.js may insert icon <link> tags after this script (streamed
+ * browser-tab icon at its crest, and the iPhone home-screen icon (apple-touch-icon) at its icon, so
+ * "Add to Home Screen" picks up the chosen club. Next.js may insert icon <link> tags after this script (streamed
  * metadata), so new ones are caught as they appear. The team is read from <html data-team>, so a
  * later switch (applyTeam) is respected too.
  */
-export const TEAM_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${TEAM_COOKIE}=([^;]+)/);var t=m&&decodeURIComponent(m[1]);var icons=${JSON.stringify(TEAM_ICONS)};var root=document.documentElement;if(t in icons)root.setAttribute("data-team",t);var setIcon=function(){var h=icons[root.getAttribute("data-team")]||icons[${JSON.stringify(DEFAULT_TEAM)}];var ls=document.querySelectorAll('link[rel~="icon"]');for(var i=0;i<ls.length;i++){if(ls[i].getAttribute("href")!==h){ls[i].href=h;ls[i].removeAttribute("sizes");ls[i].removeAttribute("type")}}};setIcon();new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++){var n=a[j];if(n.nodeName==="LINK"||(n.querySelector&&n.querySelector('link[rel~="icon"]'))){setIcon();return}}}}).observe(root,{childList:true,subtree:true})}catch(e){}})()`;
+export const TEAM_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${TEAM_COOKIE}=([^;]+)/);var t=m&&decodeURIComponent(m[1]);var icons=${JSON.stringify(TEAM_ICONS)};var root=document.documentElement;if(t in icons)root.setAttribute("data-team",t);var setIcon=function(){var h=icons[root.getAttribute("data-team")]||icons[${JSON.stringify(DEFAULT_TEAM)}];var ls=document.querySelectorAll('link[rel~="icon"]');for(var i=0;i<ls.length;i++){if(ls[i].getAttribute("href")!==h){ls[i].href=h;ls[i].removeAttribute("sizes");ls[i].removeAttribute("type")}}var a="/teams/"+(root.getAttribute("data-team")||${JSON.stringify(DEFAULT_TEAM)})+"/apple-icon.png";var as=document.querySelectorAll('link[rel="apple-touch-icon"]');for(var k=0;k<as.length;k++){if(as[k].getAttribute("href")!==a)as[k].href=a}};setIcon();new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++){var n=a[j];if(n.nodeName==="LINK"||(n.querySelector&&n.querySelector('link[rel~="icon"]'))){setIcon();return}}}}).observe(root,{childList:true,subtree:true})}catch(e){}})()`;
 
 /** CSS for every team: colour variables, crest and symbol, and which team texts are visible. */
 export function teamCss(): string {
@@ -232,8 +244,13 @@ export function teamCss(): string {
         ? `:root:not([data-team]) .${cls}, :root[data-team="${t.id}"] .${cls}`
         : `:root[data-team="${t.id}"] .${cls}`;
     const hidePattern = scoped(t.patternTile ? "team-pattern-grid" : "team-pattern-tile");
+    // Full-colour symbols: drawn as an image instead of a tinted mask, faint in the background pattern.
+    const inColor = t.symbolInColor
+      ? `${scoped("team-symbol")}{-webkit-mask-image:none;mask-image:none;background-color:transparent;background-image:var(--team-symbol);background-size:contain;background-position:center;background-repeat:no-repeat}` +
+        `${scoped("team-pattern-grid .team-symbol")}{opacity:.16}`
+      : "";
     const hideSide = scoped(t.sideSymbols === "big" ? "team-side-compact" : "team-side-big");
-    return `${selector}{${vars}}${textSelector}{display:inline}${noShooter}${noMirror}${hidePattern},${hideSide}{display:none}`;
+    return `${selector}{${vars}}${textSelector}{display:inline}${noShooter}${noMirror}${hidePattern},${hideSide}{display:none}${inColor}`;
   });
   return `[data-team-text]{display:none}${rules.join("")}`;
 }
